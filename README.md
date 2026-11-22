@@ -1,4 +1,4 @@
-# Backrooms Build Brawl — Prototype Gate
+# Backrooms Build Brawl
 
 A 3D arena prototype based on the drawings and story of **August Spangler**.
 
@@ -13,11 +13,17 @@ and friends — and when you get bonked, you don't just wait to respawn. You get
 
 ## This build
 
-This is the *prototype gate* build — it exists to prove the hardest part first:
-a bot that can chase you through a maze you keep rebuilding.
+The full game (the navigation prototype passed its gate and the director's playtest):
 
-- One Balloon Smiler bot with grid pathfinding that updates live when blocks change
-- The bot reroutes around new walls and bonks through destructible blocks when trapped
+- Three bot rivals — Balloon Smiler (rusher), Crab Boss (strafing tank), Hazmat Explorer
+  (cover-user and flanker) — fighting you *and each other*, with a live scoreboard
+- Bots play the whole game: when bonked, each bot does its own Bonk-to-Build and
+  raises a small fort before respawning
+- Grid pathfinding that updates live when blocks change; bots reroute around new
+  walls and bonk through destructible blocks when trapped
+- 5-minute matches; ties go to Sudden Bonk overtime (first bonk wins, 30 quiet
+  seconds is a draw)
+- Two-zone arena: Yellow Rooms + flooded Water Rooms, landmarks, minimap, pre-built cover
 - Bonk-to-Build ghost mode: 60-second build window, RESPAWN NOW button, safe-respawn check
 - Swept projectile collision, instanced block rendering — built to hold 30+ FPS on a Chromebook
 - Test Lab (press `P` in a match) with one-button versions of the design review tests

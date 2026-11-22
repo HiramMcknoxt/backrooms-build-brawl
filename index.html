@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Backrooms Build Brawl — Prototype Gate</title>
+<title>Backrooms Build Brawl</title>
 <style>
 :root{--yel:#f2d34b;--blue:#2b59c3;--sleeve:#f5c400;--water:#2f8fe0;--crab:#a0432a;--ink:#1d1a10;--paper:#fff8d6}
 *{box-sizing:border-box}
@@ -12,13 +12,23 @@ html,body{margin:0;height:100%;overflow:hidden;background:#cbb867;font-family:"T
 .hud{position:fixed;pointer-events:none;z-index:5}
 .hidden{display:none!important}
 .chip{background:rgba(29,26,16,.72);color:#fff;border-radius:12px;padding:6px 12px;font-weight:800;text-shadow:0 2px 0 #000}
-#hudTL{left:14px;top:12px;display:flex;flex-direction:column;gap:6px}
-#hearts{font-size:30px;letter-spacing:2px}
-#hudTop{left:50%;top:10px;transform:translateX(-50%);text-align:center}
+#hudTL{left:14px;top:12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+#hearts{font-size:28px;letter-spacing:2px}
+#board{font-size:15px;line-height:1.45;min-width:190px}
+#board .r{display:flex;justify-content:space-between;gap:12px}
+#board .me{color:#9fc4ff}
+#board .gh{opacity:.6}
+#pauseNote{font-size:13px;background:rgba(43,89,195,.85)}
+#hudTop{left:50%;top:10px;transform:translateX(-50%);text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
 #timer{font-size:30px}
+#timer.ot{background:#c0281e;animation:pulse .5s infinite alternate}
+#otBanner{font-size:18px;background:#c0281e}
+#feed{display:flex;flex-direction:column;gap:3px;align-items:center}
+#feed div{font-size:13px;background:rgba(29,26,16,.6);color:#fff;padding:2px 10px;border-radius:8px;font-weight:700}
 #hudTR{right:14px;top:12px;text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 #capBar{width:170px;height:12px;background:#0005;border-radius:6px;overflow:hidden;margin-top:4px}
 #capFill{height:100%;width:0;background:linear-gradient(90deg,#7bd389,#f5c400,#e0523a)}
+#minimap{width:160px;height:160px;border:3px solid #1d1a10;border-radius:10px;background:#1d1a10;image-rendering:pixelated}
 #fps{font-size:12px;font-weight:700;opacity:.85}
 #cross{left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px}
 #cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 0 2px #0008}
@@ -34,19 +44,19 @@ html,body{margin:0;height:100%;overflow:hidden;background:#cbb867;font-family:"T
 #msg{left:50%;bottom:96px;transform:translateX(-50%);font-size:21px;font-weight:900;color:#fff;text-shadow:0 3px 0 #000,0 0 8px #000;text-align:center;width:min(900px,92vw)}
 #flash{inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(230,40,30,.6));opacity:0;transition:opacity .25s}
 #shield{inset:0;box-shadow:inset 0 0 60px 20px rgba(120,220,255,.75);opacity:0}
-#shieldTxt{left:50%;top:22%;transform:translateX(-50%);font-size:24px;color:#bff3ff;font-weight:900;text-shadow:0 3px 0 #035}
+#shieldTxt{left:50%;top:24%;transform:translateX(-50%);font-size:24px;color:#bff3ff;font-weight:900;text-shadow:0 3px 0 #035}
 #ghostTint{inset:0;background:radial-gradient(ellipse at center,rgba(170,210,255,.10) 40%,rgba(60,90,200,.45));}
-#ghostUI{left:50%;top:56px;transform:translateX(-50%);text-align:center;color:#fff;text-shadow:0 4px 0 #123,0 0 12px #36f}
+#ghostUI{left:50%;top:92px;transform:translateX(-50%);text-align:center;color:#fff;text-shadow:0 4px 0 #123,0 0 12px #36f}
 #ghostUI .gTitle{font-size:24px;font-weight:900}
 #gCount{font-size:84px;font-weight:900;line-height:1}
 #gInfo{font-size:19px;font-weight:800}
-#gInfo2{font-size:15px;font-weight:700;opacity:.9;margin-top:4px}
+#gInfo2{font-size:14px;font-weight:700;opacity:.95;margin-top:4px}
 #btnRespawn{position:fixed;right:18px;bottom:18px;pointer-events:auto;z-index:6}
 #arrow{left:50%;top:50%;width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-bottom:34px solid #ff5a3c;filter:drop-shadow(0 0 4px #000);animation:pulse .8s infinite alternate}
 @keyframes pulse{from{opacity:.55}to{opacity:1}}
-.pop{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font-size:42px;font-weight:900;color:#ffe14a;text-shadow:0 4px 0 #7a3b00,0 0 10px #000;pointer-events:none;z-index:7;animation:popUp 1s ease-out forwards}
+.pop{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font-size:42px;font-weight:900;color:#ffe14a;text-shadow:0 4px 0 #7a3b00,0 0 10px #000;pointer-events:none;z-index:7;animation:popUp 1.1s ease-out forwards;white-space:nowrap}
 @keyframes popUp{0%{transform:translate(-50%,-30%) scale(.6);opacity:0}15%{transform:translate(-50%,-50%) scale(1.15);opacity:1}100%{transform:translate(-50%,-140%) scale(1);opacity:0}}
-#debug{left:10px;top:120px;font:12px/1.35 ui-monospace,Consolas,monospace;color:#d6ffd0;background:rgba(0,0,0,.66);padding:8px 10px;border-radius:8px;white-space:pre;max-width:46vw}
+#debug{left:10px;top:50%;transform:translateY(-50%);font:12px/1.35 ui-monospace,Consolas,monospace;color:#d6ffd0;background:rgba(0,0,0,.66);padding:8px 10px;border-radius:8px;white-space:pre;max-width:60vw}
 .overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(90deg,rgba(242,211,75,.93) 0 22px,rgba(226,194,64,.93) 22px 26px)}
 #pause,#end{background:rgba(25,22,10,.62)}
 .card{background:var(--paper);border:5px solid var(--ink);border-radius:22px;box-shadow:0 10px 0 var(--ink);padding:18px 22px;max-width:min(1040px,96vw);max-height:94vh;overflow:auto}
@@ -72,16 +82,30 @@ h3{margin:0 0 6px;font-size:17px;color:var(--crab)}
 #loading{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;background:var(--yel);text-align:center;padding:20px}
 #pauseWhy{font-weight:800;color:var(--crab);min-height:20px}
 #endStats{font-size:18px;line-height:1.6}
+#endBoard{margin:10px auto;border-collapse:collapse;font-size:18px}
+#endBoard td{padding:4px 14px;border-bottom:2px solid #0002;text-align:left}
+#endBoard tr.win td{background:#ffe680;font-weight:900}
+.roster{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.roster span{background:#fff3c4;border:2px solid var(--ink);border-radius:10px;padding:2px 8px;font-weight:800;font-size:13px}
 </style>
 </head>
 <body>
 <canvas id="c" tabindex="0"></canvas>
 
-<div id="hudTL" class="hud hidden"><div id="hearts" class="chip">❤️❤️❤️</div><div id="score" class="chip">BONKS 0</div></div>
-<div id="hudTop" class="hud hidden"><div id="timer" class="chip">5:00</div></div>
+<div id="hudTL" class="hud hidden">
+  <div id="hearts" class="chip">❤️❤️❤️</div>
+  <div id="board" class="chip"></div>
+  <div id="pauseNote" class="chip hidden">⏸ Bot-vs-bot scoring paused while you build</div>
+</div>
+<div id="hudTop" class="hud hidden">
+  <div id="timer" class="chip">5:00</div>
+  <div id="otBanner" class="chip hidden">⚡ SUDDEN BONK — first bonk wins!</div>
+  <div id="feed"></div>
+</div>
 <div id="hudTR" class="hud hidden">
-  <div class="chip"><div id="capTxt">FORT BLOCKS 0/120</div><div id="capBar"><div id="capFill"></div></div></div>
+  <div class="chip"><div id="capTxt">BLOCKS 0/160</div><div id="capBar"><div id="capFill"></div></div></div>
   <div id="pocketTxt" class="chip">POCKET 15</div>
+  <canvas id="minimap" width="160" height="160"></canvas>
   <div id="fps" class="chip">-- FPS</div>
 </div>
 <div id="cross" class="hud hidden"></div>
@@ -100,7 +124,7 @@ h3{margin:0 0 6px;font-size:17px;color:var(--crab)}
   <div class="gTitle">👻 BONK-TO-BUILD!</div>
   <div id="gCount">60</div>
   <div id="gInfo">Build your fort! Blocks left: 30</div>
-  <div id="gInfo2">You'll pop back in right where the flag is.</div>
+  <div id="gInfo2">You'll pop back in right where the flag is. Bot-vs-bot scoring is paused — you can't fall behind!</div>
 </div>
 <button id="btnRespawn" class="btn hidden">RESPAWN NOW (Enter / Ⓧ)</button>
 <div id="arrow" class="hud hidden"></div>
@@ -109,19 +133,20 @@ h3{margin:0 0 6px;font-size:17px;color:var(--crab)}
 <div id="title" class="overlay">
   <div class="card">
     <h1>BACKROOMS<br>BUILD BRAWL</h1>
-    <div class="credit">A game by <b>August Spangler</b> — Director · Art &amp; story from August's drawings (Captain Clark, the Backrooms levels)</div>
+    <div class="credit">A game by <b>August Spangler</b> — Director · Art &amp; story by August (Captain Clark, the Backrooms levels)</div>
     <div class="tag">1 Player vs Bots — Multiplayer coming later.</div>
-    <div class="tag" style="background:#a0432a;color:#fff">PROTOTYPE GATE v0.1 — testing bots in a maze you can rebuild</div>
+    <div class="roster"><span>🏴‍☠️ You (Hat Launcher)</span><span>🎈 Balloon Smiler</span><span>🦀 Crab Boss</span><span>☢️ Hazmat Explorer</span></div>
     <div class="row">
       <button id="btnPlay" class="btn">▶ PLAY</button>
       <button id="btnPlayKeys" class="btn alt">PLAY without mouse lock (trackpad / keys)</button>
     </div>
     <div class="cols">
       <div class="panel"><h3>How to play</h3>
-        <p>You're a pirate kid with a <b>Hat Launcher</b>. Bonk the Backrooms bots with spinning hats!</p>
-        <p><b>Got bonked? Don't worry!</b> You turn into a ghost 👻 and get <b>60 seconds</b> to build a fort right where you fell (look for the glowing pirate flag).</p>
-        <p>When time's up — or you press <b>RESPAWN NOW</b> — you pop back in <b>inside your fort</b> with full hearts and a shield. That's <b>Bonk-to-Build!</b></p>
-        <p>Most bonks in 5 minutes wins.</p>
+        <p>You're a pirate kid with a <b>Hat Launcher</b>. Bonk the Backrooms bots with spinning hats! The bots bonk each other too.</p>
+        <p><b>Got bonked? Don't worry!</b> You turn into a ghost 👻 and get <b>60 seconds</b> to build a fort where you fell (look for the glowing pirate flag). While you build, the bots can't score on each other — you can't fall behind.</p>
+        <p>Press <b>RESPAWN NOW</b> when you're ready and pop back in <b>inside your fort</b> with a shield. That's <b>Bonk-to-Build!</b></p>
+        <p>Most bonks in 5 minutes wins. Tied? <b>SUDDEN BONK</b> — first bonk wins!</p>
+        <p class="small">Find your way: the red EXIT sign is the middle of the Yellow Rooms. Captain Clark's ship is in the Water Rooms. Check the map in the corner.</p>
       </div>
       <div class="panel"><h3>Controls</h3>
         <p><kbd>WASD</kbd> move · <kbd>Mouse</kbd> look · <kbd>Click</kbd> throw hat / place block</p>
@@ -133,13 +158,14 @@ h3{margin:0 0 6px;font-size:17px;color:var(--crab)}
         <p><b>Controller:</b> L-stick move · R-stick look · RT throw/place · LT remove · A jump · Y build · LB/RB block · X respawn now · Start pause</p>
       </div>
       <div class="panel"><h3>Settings</h3>
-        <label>Bots <select id="setBots"><option value="1" selected>1 (prototype gate)</option><option value="3">3</option><option value="5">5</option></select></label>
+        <label>Bots <select id="setBots"><option value="3" selected>3 (one of each)</option><option value="5">5</option></select></label>
         <label>Bot skill <select id="setDiff"><option value="easy">Easy</option><option value="normal" selected>Normal</option></select></label>
         <label>Look speed <input id="setSens" type="range" min="0.3" max="2.5" step="0.1" value="1"></label>
         <label>Stick deadzone <input id="setDead" type="range" min="0.05" max="0.4" step="0.01" value="0.18"></label>
         <label>Sound <select id="setMute"><option value="0">On</option><option value="1">Muted</option></select></label>
         <label>Debug overlay <select id="setDebug"><option value="0">Off</option><option value="1">On</option></select></label>
-        <p class="small">Test Lab: start a match, then press <b>P</b> to open the prototype-gate tests.</p>
+        <p class="small">Normal bots miss about 4 shots in 10 and flash before they fire. Easy bots miss more and wait longer.</p>
+        <p class="small">Test Lab: start a match, then press <b>P</b>.</p>
       </div>
       <div class="panel"><h3>Controller test</h3>
         <div id="padStatus">No controller found — plug one in and press any button.</div>
@@ -159,7 +185,7 @@ h3{margin:0 0 6px;font-size:17px;color:var(--crab)}
       <button id="btnNoLock" class="btn alt">Play without mouse lock</button>
       <button id="btnQuit" class="btn alt">Quit to title</button>
     </div>
-    <div class="panel" style="margin-top:10px"><h3>🧪 Test Lab — prototype gate checks</h3>
+    <div class="panel" style="margin-top:10px"><h3>🧪 Test Lab</h3>
       <div class="row">
         <button class="btn sm" data-test="seal">1 · Seal the corridor</button>
         <button class="btn sm" data-test="prison">2 · Prison respawn</button>
@@ -167,9 +193,11 @@ h3{margin:0 0 6px;font-size:17px;color:var(--crab)}
         <button class="btn sm" data-test="fps15">4 · Force 15 FPS (toggle)</button>
         <button class="btn sm" data-test="end10">5 · Match ends in 10s</button>
         <button class="btn sm" data-test="bonk">6 · Bonk me now</button>
+        <button class="btn sm" data-test="tie">7 · Force a tie → Sudden Bonk</button>
+        <button class="btn sm" data-test="botfort">8 · Bonk nearest bot (watch its fort)</button>
         <button class="btn sm" data-test="debug">Debug overlay (toggle)</button>
       </div>
-      <p class="small">1: walls off the bot's route to you — it should find another way or bonk through. 2: seals your fall spot (and above it) — respawn must still put you somewhere safe. 3: watch the FPS chip (goal: 30+). 4: run around at 15 FPS — hats and you should never pass through walls. 5: die near the end — the match must end cleanly.</p>
+      <p class="small">1: walls off a bot's route to you — it reroutes or bonks through. 2: seals your fall spot — respawn must still be safe. 3: watch FPS (goal 30+). 4: at 15 FPS nothing should pass through walls. 5: die near the end — the match must end cleanly. 7: ties every score and ends the clock. 8: bonks the closest bot — it builds a real fort for 60s, then respawns inside it.</p>
     </div>
   </div>
 </div>
@@ -177,6 +205,8 @@ h3{margin:0 0 6px;font-size:17px;color:var(--crab)}
 <div id="end" class="overlay hidden">
   <div class="card" style="text-align:center">
     <h2 id="endTitle">MATCH OVER</h2>
+    <div id="endReason" style="font-weight:800"></div>
+    <table id="endBoard"></table>
     <div id="endStats"></div>
     <div class="row" style="justify-content:center">
       <button id="btnAgain" class="btn">PLAY AGAIN</button>
@@ -189,8 +219,9 @@ h3{margin:0 0 6px;font-size:17px;color:var(--crab)}
 
 <script type="module">
 // ================================================================
-//  BACKROOMS BUILD BRAWL — PROTOTYPE GATE v0.1
-//  Director: August Spangler. Single file, Three.js from CDN.
+//  BACKROOMS BUILD BRAWL — full game v1.0
+//  Director: August Spangler. Art & story by August.
+//  Single file. Three.js from CDN. All art generated in code.
 // ================================================================
 const $ = id => document.getElementById(id);
 let THREE = null;
@@ -200,11 +231,12 @@ for (const u of ['https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.
 }
 if (!THREE) {
   $('loading').textContent = "Couldn't load the 3D engine. Connect to the internet and refresh the page.";
-  await new Promise(() => {}); // stop here quietly
+  await new Promise(() => {});
 }
 
 // ---------------- constants ----------------
-const N = 23, CS = 2, CEIL = 4;
+const N = 25, CS = 2, CEIL = 4;
+const DIVIDER_I = 16;              // column of wall between Yellow Rooms (left) and Water Rooms (right)
 const T_BRICK = 0, T_RAMP = 1, T_PIPE = 2;
 const TYPE_NAME = ['Backroom Brick', 'Pirate Plank', 'Splash Pipe'];
 const TYPE_H = [2, 2, 1];
@@ -213,8 +245,9 @@ const DX = [1, 0, -1, 0], DZ = [0, 1, 0, -1];
 const RAMP_ROT = [0, -Math.PI / 2, Math.PI, Math.PI / 2];
 const PLAYER_H = 1.7, HALF = 0.32, STEP = 0.45, GRAV = 20, JUMP_V = 7.6;
 const WALK = 5.2, SPRINT = 7.4, WATER_SLOW = 0.8;
-const MAX_WORLD_BLOCKS = 120, GHOST_BUDGET = 30, POCKET_MAX = 15, POCKET_REGEN = 3;
-const GHOST_TIME = 60, MATCH_TIME = 300, RESPAWN_INVULN = 3, ZONE_R = 6, BUILD_RANGE = 9;
+const MAX_WORLD_BLOCKS = 160, IM_CAP = MAX_WORLD_BLOCKS + 24;
+const GHOST_BUDGET = 30, POCKET_MAX = 15, POCKET_REGEN = 3;
+const GHOST_TIME = 60, MATCH_TIME = 300, OVERTIME_T = 30, RESPAWN_INVULN = 3, ZONE_R = 6, BUILD_RANGE = 9;
 const HAT_SPEED = 22, HAT_GRAV = 6, HAT_CD = 0.4, MAX_HATS = 64, HAT_LIFE = 3;
 const FIXED = 1 / 90;
 const S = { TITLE: 'TITLE', PLAYING: 'PLAYING', GHOST: 'GHOST_BUILD', RESPAWNING: 'RESPAWNING', ENDED: 'MATCH_ENDED' };
@@ -229,22 +262,24 @@ const DIFF = {
   easy:   { miss: 0.6, windup: 0.7, interval: 2.4 },
   normal: { miss: 0.4, windup: 0.4, interval: 1.6 },
 };
-const BOT_TYPES = [
-  { key: 'balloon', name: 'Balloon Smiler',  hp: 3, speed: 4.3, h: 1.8, half: 0.40, role: 'rusher',  range: 14 },
-  { key: 'hazmat',  name: 'Hazmat Explorer', hp: 3, speed: 3.7, h: 1.75, half: 0.34, role: 'flanker', range: 16 },
-  { key: 'crab',    name: 'Crab Boss',       hp: 5, speed: 3.1, h: 1.2, half: 0.55, role: 'tank',    range: 12 },
-];
+const BOT_TYPES = {
+  balloon: { key: 'balloon', name: 'Balloon Smiler',  emoji: '🎈', color: '#ffd21f', hp: 3, speed: 4.3, h: 1.8,  half: 0.40, role: 'rusher',  range: 14 },
+  crab:    { key: 'crab',    name: 'Crab Boss',       emoji: '🦀', color: '#d0532f', hp: 5, speed: 3.1, h: 1.2,  half: 0.55, role: 'tank',    range: 12 },
+  hazmat:  { key: 'hazmat',  name: 'Hazmat Explorer', emoji: '☢️', color: '#ff8c1a', hp: 3, speed: 3.7, h: 1.75, half: 0.34, role: 'flanker', range: 16 },
+};
+const ROSTER_ORDER = ['balloon', 'crab', 'hazmat', 'balloon', 'hazmat'];
 
-const settings = { bots: 1, diff: 'normal', sens: 1, dead: 0.18, debug: false };
+const settings = { bots: 3, diff: 'normal', sens: 1, dead: 0.18, debug: false };
 
 // ---------------- game state ----------------
 let state = S.TITLE, paused = false;
-let inputMode = 'mouse'; // 'mouse' | 'keys' | 'pad'
+let inputMode = 'mouse';
 let matchT = MATCH_TIME, timeScale = 1, slowmoT = 0, gameTime = 0;
+let overtime = false, otT = 0;
 const perm = new Uint8Array(N * N), water = new Uint8Array(N * N);
 const stacks = []; for (let k = 0; k < N * N; k++) stacks.push([]);
-let blockCount = 0, blocksDirty = true, navDirty = true, blockSerial = 1;
-const player = { x: 0, y: 0, z: 0, vy: 0, h: PLAYER_H, half: HALF, grounded: false, hp: 3, yaw: 0, pitch: 0,
+let blockCount = 0, blocksDirty = true, navVersion = 1, blockSerial = 1;
+const player = { name: 'You', emoji: '🏴‍☠️', color: '#5b8cff', x: 0, y: 0, z: 0, vy: 0, h: PLAYER_H, half: HALF, grounded: false, hp: 3, yaw: 0, pitch: 0,
   invuln: 0, hitCd: 0, fireCd: 0, score: 0, bonked: 0, built: 0, pocket: POCKET_MAX, pocketT: 0, isPlayer: true, stuckGeom: 0 };
 let buildMode = false, selType = T_BRICK;
 const ghost = { x: 0, y: 0, z: 0, t: 0, left: 0, fallCell: -1, fx: 0, fy: 0, fz: 0, intro: 0, autoT: -1 };
@@ -253,9 +288,10 @@ let bots = [];
 let shake = 0, recoil = 0, bob = 0;
 let primaryHeld = false, placeRepeat = 0;
 let fps15 = false, autoFireT = 0;
-let navRecomputes = 0, navMs = 0, navGoal = -1, navTimer = 0;
+let navRecomputes = 0, navMs = 0, navBudget = 2;
 const transitionsLog = [];
 let buildTarget = null;
+let landmarks = [];
 
 // ---------------- RNG ----------------
 function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -303,12 +339,15 @@ const SFX_DEFS = {
   ghost() { tone(180, 720, 0.9, 'sine', 0.16); },
   respawn() { [523, 659, 784, 1046].forEach((f, i) => tone(f, f, 0.14, 'square', 0.1, i * 0.08)); },
   botBonk() { [784, 988, 1318].forEach((f, i) => tone(f, f * 1.02, 0.12, 'triangle', 0.2, i * 0.07)); },
+  farBonk() { tone(500, 200, 0.2, 'triangle', 0.08); },
   deny() { tone(140, 120, 0.08, 'square', 0.13); tone(140, 120, 0.08, 'square', 0.13, 0.11); },
   place() { tone(260, 180, 0.05, 'square', 0.14); noise(0.04, 0.2, 1800, 4); },
   remove() { tone(180, 320, 0.08, 'triangle', 0.15); },
   tick() { tone(1200, 1200, 0.04, 'square', 0.05); },
   windup() { tone(300, 520, 0.2, 'triangle', 0.05); },
   sparkle() { tone(1500, 2200, 0.1, 'sine', 0.08); },
+  horn() { [392, 392, 523].forEach((f, i) => tone(f, f, 0.22, 'sawtooth', 0.14, i * 0.24)); },
+  fanfare() { [523, 659, 784, 1046, 784, 1046].forEach((f, i) => tone(f, f, 0.18, 'square', 0.12, i * 0.12)); },
 };
 function sfx(name) { const now = performance.now(); if (lastSfx[name] && now - lastSfx[name] < 45) return; lastSfx[name] = now; SFX_DEFS[name](); }
 
@@ -319,7 +358,7 @@ let renderScale = 1;
 const scene = new THREE.Scene();
 const FOG_COL = 0xcbb867;
 scene.background = new THREE.Color(FOG_COL);
-scene.fog = new THREE.Fog(FOG_COL, 9, 40);
+scene.fog = new THREE.Fog(FOG_COL, 9, 42);
 const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.05, 90);
 camera.rotation.order = 'YXZ';
 scene.add(camera);
@@ -339,6 +378,22 @@ function canvasTex(w, h, draw, rx = 1, ry = 1) {
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry);
   t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 2; return t;
 }
+function drawCracks(g, w, h, level, seed) {
+  const r = mulberry32(seed);
+  g.lineCap = 'round';
+  const n = level === 1 ? 3 : 7;
+  for (let k = 0; k < n; k++) {
+    let x = w * (0.15 + r() * 0.7), y = h * (0.15 + r() * 0.7);
+    g.strokeStyle = 'rgba(25,15,5,.9)'; g.lineWidth = level === 1 ? 2.5 : 3.5;
+    g.beginPath(); g.moveTo(x, y);
+    for (let s = 0; s < 5 + level * 2; s++) { x += (r() - 0.5) * w * 0.28; y += (r() - 0.5) * h * 0.28; g.lineTo(x, y); }
+    g.stroke();
+    g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1; g.stroke();
+  }
+  if (level === 2) { g.fillStyle = 'rgba(25,15,5,.55)'; for (let k = 0; k < 6; k++) { const x = r() * w, y = r() * h; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 8, y + 3); g.lineTo(x + 3, y + 9); g.fill(); } }
+}
+// a base texture plus two cracked versions (hp 2, hp 1)
+function texSet(w, h, draw) { return [0, 1, 2].map(l => canvasTex(w, h, (g, W, H) => { draw(g, W, H); if (l) drawCracks(g, W, H, l, 91 + l * 7); })); }
 const texWall = canvasTex(128, 256, (g, w, h) => {
   g.fillStyle = '#dcc65a'; g.fillRect(0, 0, w, h);
   for (let x = 0; x < w; x += 16) { g.fillStyle = '#ceb54b'; g.fillRect(x, 0, 5, h); }
@@ -347,26 +402,34 @@ const texWall = canvasTex(128, 256, (g, w, h) => {
   g.fillStyle = '#8f7d33'; g.fillRect(0, h - 12, w, 12);
   g.fillStyle = 'rgba(80,60,10,.12)'; g.fillRect(0, 0, w, 20);
 });
+const texTile = canvasTex(128, 256, (g, w, h) => {
+  g.fillStyle = '#7fb3d9'; g.fillRect(0, 0, w, h);
+  for (let y = 0; y < h; y += 16) for (let x = 0; x < w; x += 16) { g.fillStyle = ((x + y) / 16) % 2 ? '#e8f4fb' : '#d6ebf7'; g.fillRect(x + 1, y + 1, 14, 14); }
+  g.fillStyle = '#2f7fc8'; g.fillRect(0, h - 40, w, 10); g.fillRect(0, 60, w, 6);
+  g.fillStyle = 'rgba(30,80,120,.25)'; g.fillRect(0, h - 30, w, 30);
+});
 const texCarpet = canvasTex(128, 128, (g, w, h) => {
   g.fillStyle = '#bca449'; g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 1400; i++) { g.fillStyle = Math.random() < 0.5 ? 'rgba(120,96,30,.35)' : 'rgba(235,215,120,.35)'; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+  const r = mulberry32(5);
+  for (let i = 0; i < 1400; i++) { g.fillStyle = r() < 0.5 ? 'rgba(120,96,30,.35)' : 'rgba(235,215,120,.35)'; g.fillRect(r() * w, r() * h, 2, 2); }
   g.strokeStyle = 'rgba(110,90,30,.25)'; g.strokeRect(0, 0, w, h);
 }, N, N);
 const texCeil = canvasTex(128, 128, (g, w, h) => {
   g.fillStyle = '#ebe3c3'; g.fillRect(0, 0, w, h);
-  g.fillStyle = 'rgba(120,110,80,.35)'; for (let i = 0; i < 260; i++) g.fillRect(Math.random() * w, Math.random() * h, 2, 2);
+  const r = mulberry32(9);
+  g.fillStyle = 'rgba(120,110,80,.35)'; for (let i = 0; i < 260; i++) g.fillRect(r() * w, r() * h, 2, 2);
   g.strokeStyle = '#a99d74'; g.lineWidth = 4; g.strokeRect(0, 0, w, h);
 }, N, N);
-const texBrick = canvasTex(128, 128, (g, w, h) => {
+const texBrick = texSet(128, 128, (g, w, h) => {
   g.fillStyle = '#8f7a2e'; g.fillRect(0, 0, w, h);
   const bh = 21;
   for (let r = 0; r < 7; r++) for (let c = -1; c < 4; c++) {
-    const x = c * 42 + (r % 2 ? 21 : 0) + 2, y = r * bh - 2 + 2;
+    const x = c * 42 + (r % 2 ? 21 : 0) + 2, y = r * bh;
     g.fillStyle = ['#f0d468', '#e9cb5a', '#f4dc7c'][(r + c + 3) % 3]; g.fillRect(x, y, 38, bh - 4);
     g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(x, y, 38, 3);
   }
 });
-const texPlank = canvasTex(128, 128, (g, w, h) => {
+const texPlank = texSet(128, 128, (g, w, h) => {
   g.fillStyle = '#6b3d16'; g.fillRect(0, 0, w, h);
   for (let i = 0; i < 4; i++) {
     g.fillStyle = ['#b5723a', '#a8672f', '#c07d43', '#ad6c34'][i]; g.fillRect(2, i * 32 + 2, w - 4, 28);
@@ -375,12 +438,13 @@ const texPlank = canvasTex(128, 128, (g, w, h) => {
     g.fillStyle = '#333'; g.fillRect(8, i * 32 + 14, 4, 4); g.fillRect(w - 12, i * 32 + 14, 4, 4);
   }
 });
-const texPipe = canvasTex(128, 64, (g, w, h) => {
+const texPipe = texSet(128, 64, (g, w, h) => {
   const grd = g.createLinearGradient(0, 0, 0, h); grd.addColorStop(0, '#1f4f9a'); grd.addColorStop(0.35, '#6aa6f0'); grd.addColorStop(0.6, '#3a7bd5'); grd.addColorStop(1, '#173e7c');
   g.fillStyle = grd; g.fillRect(0, 0, w, h);
   g.fillStyle = '#f5c400'; g.fillRect(0, 0, 10, h); g.fillRect(w - 10, 0, 10, h);
   g.fillStyle = '#dfe9f7'; for (let x = 24; x < w - 16; x += 22) { g.beginPath(); g.arc(x, h / 2, 3, 0, 7); g.fill(); }
 });
+const BLOCK_TEX = [texBrick, texPlank, texPipe];
 const texWater = canvasTex(64, 64, (g, w, h) => {
   g.fillStyle = '#2f8fe0'; g.fillRect(0, 0, w, h);
   g.strokeStyle = 'rgba(210,240,255,.7)'; g.lineWidth = 2;
@@ -392,21 +456,43 @@ const texFlag = canvasTex(128, 88, (g, w, h) => {
   g.fillStyle = '#f5c400'; g.fillRect(30, 60, 68, 6);
   g.fillStyle = '#fff'; g.font = 'bold 14px sans-serif'; g.textAlign = 'center'; g.fillText('BUILD HERE', 64, 82);
 });
+const texExit = canvasTex(128, 48, (g, w, h) => {
+  g.fillStyle = '#2a0606'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#ff3b2f'; g.font = 'bold 36px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('EXIT', w / 2, h / 2 + 2);
+});
+const texSmiley = canvasTex(128, 128, (g, w, h) => {
+  g.fillStyle = '#ffe04a'; g.beginPath(); g.arc(64, 64, 58, 0, 7); g.fill();
+  g.lineWidth = 6; g.strokeStyle = '#1d1a10'; g.stroke();
+  g.fillStyle = '#1d1a10'; g.beginPath(); g.ellipse(44, 50, 8, 13, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(84, 50, 8, 13, 0, 0, 7); g.fill();
+  g.lineWidth = 7; g.beginPath(); g.arc(64, 68, 34, 0.2, Math.PI - 0.2); g.stroke();
+});
+const texVend = canvasTex(64, 128, (g, w, h) => {
+  g.fillStyle = '#c8202a'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#bfe8ff'; g.fillRect(6, 10, 38, 80);
+  const cols = ['#ffcf3a', '#3ac36b', '#ff6aa0', '#5b8cff'];
+  for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) { g.fillStyle = cols[(r + c) % 4]; g.fillRect(9 + c * 12, 14 + r * 15, 9, 11); }
+  g.fillStyle = '#222'; g.fillRect(48, 20, 10, 30); g.fillRect(8, 100, 36, 14);
+  g.fillStyle = '#fff'; g.font = 'bold 9px sans-serif'; g.fillText('SNACKS', 8, 8 + 0);
+});
+const texSail = canvasTex(64, 64, (g, w, h) => {
+  g.fillStyle = '#f6f1e2'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#1b2a6b'; g.beginPath(); g.moveTo(12, 40); g.quadraticCurveTo(32, 10, 52, 40); g.quadraticCurveTo(32, 32, 12, 40); g.fill();
+  g.fillStyle = '#f5c400'; g.fillRect(16, 42, 32, 4);
+});
 
 // ---------------- geometries / materials ----------------
 const geoWall = new THREE.BoxGeometry(CS, CEIL, CS).translate(0, CEIL / 2, 0);
 const geoBrick = new THREE.BoxGeometry(1.98, 2, 1.98).translate(0, 1, 0);
 const geoPipe = new THREE.BoxGeometry(1.98, 1, 1.98).translate(0, 0.5, 0);
 function makeRampGeo() {
-  const A = [-1, 0, 1], B = [1, 2, 1], C = [1, 2, -1], D = [-1, 0, -1];
-  const E = [1, 0, 1], F = [1, 0, -1];
+  const A = [-1, 0, 1], B = [1, 2, 1], C = [1, 2, -1], D = [-1, 0, -1], E = [1, 0, 1], F = [1, 0, -1];
   const pos = [], uv = [];
   const tri = (p, q, r, a, b, c) => { pos.push(...p, ...q, ...r); uv.push(...a, ...b, ...c); };
-  tri(A, B, C, [1, 0], [1, 1], [0, 1]); tri(A, C, D, [1, 0], [0, 1], [0, 0]);        // slope
-  tri(E, F, C, [1, 0], [0, 0], [0, 1]); tri(E, C, B, [1, 0], [0, 1], [1, 1]);        // back
-  tri(D, F, E, [0, 0], [1, 0], [1, 1]); tri(D, E, A, [0, 0], [1, 1], [0, 1]);        // bottom
-  tri(A, E, B, [0, 0], [1, 0], [1, 1]);                                               // side +z
-  tri(D, C, F, [0, 0], [1, 1], [1, 0]);                                               // side -z
+  tri(A, B, C, [1, 0], [1, 1], [0, 1]); tri(A, C, D, [1, 0], [0, 1], [0, 0]);
+  tri(E, F, C, [1, 0], [0, 0], [0, 1]); tri(E, C, B, [1, 0], [0, 1], [1, 1]);
+  tri(D, F, E, [0, 0], [1, 0], [1, 1]); tri(D, E, A, [0, 0], [1, 1], [0, 1]);
+  tri(A, E, B, [0, 0], [1, 0], [1, 1]);
+  tri(D, C, F, [0, 0], [1, 1], [1, 0]);
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos.map(v => v * 0.99), 3));
   g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
@@ -415,7 +501,7 @@ function makeRampGeo() {
 const geoRamp = makeRampGeo();
 const BLOCK_GEO = [geoBrick, geoRamp, geoPipe];
 const matWall = new THREE.MeshLambertMaterial({ map: texWall });
-const matBlock = [new THREE.MeshLambertMaterial({ map: texBrick }), new THREE.MeshLambertMaterial({ map: texPlank }), new THREE.MeshLambertMaterial({ map: texPipe })];
+const matTile = new THREE.MeshLambertMaterial({ map: texTile });
 const matWater = new THREE.MeshLambertMaterial({ map: texWater, transparent: true, opacity: 0.78, depthWrite: false });
 const m4 = new THREE.Matrix4(), dummy = new THREE.Object3D(), tmpV = new THREE.Vector3(), tmpC = new THREE.Color();
 
@@ -430,22 +516,23 @@ function makeIM(geo, mat, n, colors) {
   scene.add(im); return im;
 }
 const wallIM = makeIM(geoWall, matWall, N * N);
+const tileIM = makeIM(geoWall, matTile, N * N);
 const lightIM = makeIM(new THREE.PlaneGeometry(1.3, 0.55).rotateX(Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xfffbe6 }), 64);
 const waterIM = makeIM(new THREE.PlaneGeometry(CS, CS).rotateX(-Math.PI / 2), matWater, N * N);
-const blockIM = BLOCK_GEO.map((g, t) => makeIM(g, matBlock[t], MAX_WORLD_BLOCKS, true));
-const HP_COL = [null, new THREE.Color(0.62, 0.42, 0.38), new THREE.Color(0.85, 0.74, 0.66), new THREE.Color(1, 1, 1)];
+// blocks: one instanced mesh per (type × damage level) → crack textures, ≤ 9 draw calls for every block in the world
+const blockIM = BLOCK_GEO.map((g, t) => [0, 1, 2].map(l => makeIM(g, new THREE.MeshLambertMaterial({ map: BLOCK_TEX[t][l] }), IM_CAP, true)));
+const HP_TINT = [new THREE.Color(1, 1, 1), new THREE.Color(0.9, 0.84, 0.78), new THREE.Color(0.75, 0.62, 0.56)];
 
-// hats (pooled, instanced: 1 draw call)
-const hatGeo = new THREE.ConeGeometry(0.32, 0.22, 3);
-const hatIM = makeIM(hatGeo, new THREE.MeshLambertMaterial({ flatShading: true }), MAX_HATS, true);
+// hats (pooled, instanced)
+const hatIM = makeIM(new THREE.ConeGeometry(0.32, 0.22, 3), new THREE.MeshLambertMaterial({ flatShading: true }), MAX_HATS, true);
 hatIM.count = MAX_HATS;
 const hats = [];
 for (let i = 0; i < MAX_HATS; i++) { hats.push({ on: false, i, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, life: 0, owner: null, spin: 0 }); hatIM.setMatrixAt(i, m4.makeScale(0, 0, 0)); }
-const HAT_COL_P = new THREE.Color(0x1b2a6b), HAT_COL_B = new THREE.Color(0xd63a2a);
+const HAT_COL_P = new THREE.Color(0x1b2a6b);
 let hatPtr = 0;
 
 // particles (pooled, instanced)
-const MAXP = 240;
+const MAXP = 260;
 const partIM = makeIM(new THREE.BoxGeometry(0.14, 0.14, 0.14), new THREE.MeshBasicMaterial(), MAXP, true);
 partIM.count = MAXP;
 const parts = []; for (let i = 0; i < MAXP; i++) { parts.push({ life: 0, max: 1, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }); partIM.setMatrixAt(i, m4.makeScale(0, 0, 0)); }
@@ -522,7 +609,7 @@ const viewmodel = new THREE.Group();
   viewmodel.position.set(0.32, -0.3, -0.55); viewmodel.scale.setScalar(0.75);
 }
 camera.add(viewmodel);
-const handBlock = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.22), new THREE.MeshLambertMaterial({ map: texBrick, depthTest: false, fog: false }));
+const handBlock = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.22), new THREE.MeshLambertMaterial({ map: texBrick[0], depthTest: false, fog: false }));
 handBlock.renderOrder = 999; handBlock.position.set(0.3, -0.28, -0.5); handBlock.visible = false; camera.add(handBlock);
 
 // path debug lines
@@ -533,10 +620,14 @@ dbgGeo.setAttribute('position', new THREE.BufferAttribute(dbgPos, 3)); dbgGeo.se
 const dbgLines = new THREE.LineSegments(dbgGeo, new THREE.LineBasicMaterial({ vertexColors: true, depthTest: false }));
 dbgLines.frustumCulled = false; dbgLines.renderOrder = 998; dbgLines.visible = false; scene.add(dbgLines);
 
+// landmarks live in their own group, rebuilt per match
+const lmGroup = new THREE.Group(); scene.add(lmGroup);
+
 // ---------------- world helpers ----------------
 const inGrid = (i, j) => i >= 0 && j >= 0 && i < N && j < N;
 const cellAt = (x, z) => { const i = Math.floor(x / CS), j = Math.floor(z / CS); return inGrid(i, j) ? j * N + i : -1; };
 const cx = c => (c % N + 0.5) * CS, cz = c => (((c / N) | 0) + 0.5) * CS;
+function stepCell(c, d) { const i = c % N + DX[d], j = ((c / N) | 0) + DZ[d]; return inGrid(i, j) ? j * N + i : -1; }
 function topBlock(c) { const s = stacks[c]; return s.length ? s[s.length - 1] : null; }
 function cellTop(c) { if (perm[c]) return CEIL; const b = topBlock(c); return b ? b.base + b.h : 0; }
 function rampT(c, dir, x, z) {
@@ -562,7 +653,6 @@ function blockAtY(c, y) {
   for (const b of s) if (y >= b.base - 0.02 && y <= b.base + b.h + 0.02) return b;
   return s.length ? s[s.length - 1] : null;
 }
-// nav edge heights: height at the side of cell c facing direction d
 function edgeH(c, d) {
   if (perm[c]) return CEIL;
   const b = topBlock(c); if (!b) return 0;
@@ -570,24 +660,30 @@ function edgeH(c, d) {
   return b.base + b.h;
 }
 function centerH(c) { const b = topBlock(c); if (!b) return 0; return b.type === T_RAMP ? b.base + 1 : b.base + b.h; }
+const isWaterZone = c => (c % N) > DIVIDER_I;
 
-// ---------------- maze generation ----------------
+// ---------------- maze generation: Yellow Rooms + Water Rooms ----------------
 function genMaze(seed) {
   rng = mulberry32(seed); perm.fill(0); water.fill(0);
   for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
     if (i === 0 || j === 0 || i === N - 1 || j === N - 1) perm[j * N + i] = 1;
     if (i % 4 === 0 && j % 4 === 0) perm[j * N + i] = 1;
   }
-  const seg = (cells) => { if (rng() < 0.5) return; const door = rng() < 0.65; cells.forEach((c, k) => { if (!(door && k === 1)) perm[c] = 1; }); };
-  for (let j = 4; j < N - 1; j += 4) for (let i = 0; i + 4 < N; i += 4) seg([1, 2, 3].map(k => j * N + i + k));
-  for (let i = 4; i < N - 1; i += 4) for (let j = 0; j + 4 < N; j += 4) seg([1, 2, 3].map(k => (j + k) * N + i));
-  for (let j = 13; j < N - 1; j++) for (let i = 13; i < N - 1; i++) if (!perm[j * N + i]) water[j * N + i] = 1;
-  // guarantee connectivity: open wall cells that join regions until everything is reachable
-  for (let guard = 0; guard < 400; guard++) {
+  const seg = (cells, p) => { if (rng() > p) return; const door = rng() < 0.65; cells.forEach((c, k) => { if (!(door && k === 1)) perm[c] = 1; }); };
+  for (let j = 4; j < N - 1; j += 4) for (let i = 0; i + 4 < N; i += 4) seg([1, 2, 3].map(k => j * N + i + k), i >= DIVIDER_I ? 0.35 : 0.5);
+  for (let i = 4; i < N - 1; i += 4) for (let j = 0; j + 4 < N; j += 4) seg([1, 2, 3].map(k => (j + k) * N + i), i >= DIVIDER_I ? 0.35 : 0.5);
+  // the divider between the two zones, with four doorways
+  for (let j = 1; j < N - 1; j++) perm[j * N + DIVIDER_I] = 1;
+  for (const j of [2, 9, 15, 22]) perm[j * N + DIVIDER_I] = 0;
+  // keep the hub (around the EXIT sign) open
+  for (let j = 11; j <= 13; j++) for (let i = 7; i <= 9; i++) if (!(i % 4 === 0 && j % 4 === 0)) perm[j * N + i] = 0;
+  for (let j = 1; j < N - 1; j++) for (let i = DIVIDER_I + 1; i < N - 1; i++) if (!perm[j * N + i]) water[j * N + i] = 1;
+  // guarantee every open cell is reachable
+  for (let guard = 0; guard < 500; guard++) {
     const seen = new Uint8Array(N * N); let start = -1;
     for (let c = 0; c < N * N; c++) if (!perm[c]) { start = c; break; }
     const q = [start]; seen[start] = 1;
-    while (q.length) { const c = q.pop(); const i = c % N, j = (c / N) | 0; for (let d = 0; d < 4; d++) { const ni = i + DX[d], nj = j + DZ[d]; if (!inGrid(ni, nj)) continue; const n = nj * N + ni; if (!perm[n] && !seen[n]) { seen[n] = 1; q.push(n); } } }
+    while (q.length) { const c = q.pop(); for (let d = 0; d < 4; d++) { const n = stepCell(c, d); if (n >= 0 && !perm[n] && !seen[n]) { seen[n] = 1; q.push(n); } } }
     let unreached = false; for (let c = 0; c < N * N; c++) if (!perm[c] && !seen[c]) { unreached = true; break; }
     if (!unreached) break;
     const cands = [];
@@ -595,53 +691,59 @@ function genMaze(seed) {
       if (!perm[c]) continue; const i = c % N, j = (c / N) | 0;
       if (i === 0 || j === 0 || i === N - 1 || j === N - 1 || (i % 4 === 0 && j % 4 === 0)) continue;
       let a = false, b = false;
-      for (let d = 0; d < 4; d++) { const n = (j + DZ[d]) * N + i + DX[d]; if (perm[n]) continue; if (seen[n]) a = true; else b = true; }
+      for (let d = 0; d < 4; d++) { const n = stepCell(c, d); if (n < 0 || perm[n]) continue; if (seen[n]) a = true; else b = true; }
       if (a && b) cands.push(c);
     }
     if (!cands.length) break;
-    perm[cands[(rng() * cands.length) | 0]] = 0;
+    const c = cands[(rng() * cands.length) | 0]; perm[c] = 0; if (isWaterZone(c)) water[c] = 1;
   }
 }
 function buildMazeMeshes() {
-  let w = 0, wa = 0, l = 0;
+  let w = 0, t = 0, wa = 0, l = 0;
   for (let c = 0; c < N * N; c++) {
-    if (perm[c]) { m4.makeTranslation(cx(c), 0, cz(c)); wallIM.setMatrixAt(w++, m4); }
+    if (perm[c]) { m4.makeTranslation(cx(c), 0, cz(c)); if ((c % N) >= DIVIDER_I) tileIM.setMatrixAt(t++, m4); else wallIM.setMatrixAt(w++, m4); }
     else if (water[c]) { m4.makeTranslation(cx(c), 0.12, cz(c)); waterIM.setMatrixAt(wa++, m4); }
     const i = c % N, j = (c / N) | 0;
     if (!perm[c] && i % 4 === 2 && j % 4 === 2 && l < 64) { m4.makeTranslation(cx(c), CEIL - 0.02, cz(c)); lightIM.setMatrixAt(l++, m4); }
   }
-  wallIM.count = w; waterIM.count = wa; lightIM.count = l;
-  wallIM.instanceMatrix.needsUpdate = waterIM.instanceMatrix.needsUpdate = lightIM.instanceMatrix.needsUpdate = true;
+  wallIM.count = w; tileIM.count = t; waterIM.count = wa; lightIM.count = l;
+  for (const im of [wallIM, tileIM, waterIM, lightIM]) im.instanceMatrix.needsUpdate = true;
 }
 
-// ---------------- blocks ----------------
-function placeBlock(c, type, dir, owner) {
-  const b = { id: blockSerial++, type, h: TYPE_H[type], base: cellTop(c), hp: 3, dir: dir || 0, owner };
-  stacks[c].push(b); blockCount++; blocksDirty = navDirty = true; return b;
+// ---------------- blocks: ONE deterministic lifecycle ----------------
+// placeBlock → (hat hits: hp 3→2→1 with cracks) → removeBlock. Blocks never vanish silently.
+// Blocks above a removed block drop down. Landmark blocks (fixed) are part of the map and never counted or broken.
+function placeBlock(c, type, dir, owner, fixed = false, hidden = false) {
+  const b = { id: blockSerial++, type, h: TYPE_H[type], base: cellTop(c), hp: 3, dir: dir || 0, owner, fixed, hidden };
+  stacks[c].push(b); if (!fixed) blockCount++; blocksDirty = true; navVersion++; return b;
 }
-function removeBlock(c, b) {
+function removeBlock(c, b, force = false) {
+  if (b.fixed && !force) return;
   const s = stacks[c], k = s.indexOf(b); if (k < 0) return;
-  s.splice(k, 1); let base = 0; for (const x of s) { x.base = base; base += x.h; } // blocks above drop down
-  blockCount--; blocksDirty = navDirty = true;
+  s.splice(k, 1); let base = 0; for (const x of s) { x.base = base; base += x.h; }
+  if (!b.fixed) blockCount--; blocksDirty = true; navVersion++;
 }
 const BLOCK_COL = [0xe9cf63, 0xb5723a, 0x3a7bd5];
 function damageBlock(c, b) {
+  if (b.fixed) { sfx('clack'); return; }
   b.hp--;
   const y = b.base + b.h * 0.6;
   if (b.hp <= 0) { removeBlock(c, b); sfx('smash'); burst(cx(c), y, cz(c), BLOCK_COL[b.type], 16, 5, 4, 0.9); }
   else { sfx('crack'); burst(cx(c), y, cz(c), BLOCK_COL[b.type], 5, 3, 2, 0.5); blocksDirty = true; }
 }
 function rebuildBlocks() {
-  const cnt = [0, 0, 0];
+  const cnt = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
   for (let c = 0; c < N * N; c++) {
     const s = stacks[c]; if (!s.length) continue;
     for (const b of s) {
-      const im = blockIM[b.type], k = cnt[b.type]++; if (k >= MAX_WORLD_BLOCKS) continue;
+      if (b.hidden) continue;
+      const lvl = b.fixed ? 0 : Math.min(2, Math.max(0, 3 - b.hp));
+      const im = blockIM[b.type][lvl], k = cnt[b.type][lvl]++; if (k >= IM_CAP) continue;
       m4.makeRotationY(b.type === T_RAMP ? RAMP_ROT[b.dir] : 0); m4.setPosition(cx(c), b.base, cz(c));
-      im.setMatrixAt(k, m4); im.setColorAt(k, HP_COL[Math.max(1, b.hp)]);
+      im.setMatrixAt(k, m4); im.setColorAt(k, HP_TINT[lvl]);
     }
   }
-  for (let t = 0; t < 3; t++) { const im = blockIM[t]; im.count = Math.min(cnt[t], MAX_WORLD_BLOCKS); im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; }
+  for (let t = 0; t < 3; t++) for (let l = 0; l < 3; l++) { const im = blockIM[t][l]; im.count = Math.min(cnt[t][l], IM_CAP); im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; }
   blocksDirty = false;
 }
 function charsPhysical() { const a = []; if (state === S.PLAYING) a.push(player); for (const b of bots) if (b.alive) a.push(b); return a; }
@@ -653,17 +755,22 @@ function charOverlapsCell(c, y0, y1) {
   }
   return false;
 }
-function inZone(c) { if (ghost.fallCell < 0) return false; const fi = ghost.fallCell % N, fj = (ghost.fallCell / N) | 0, i = c % N, j = (c / N) | 0; return i >= fi - ZONE_R && i < fi + ZONE_R && j >= fj - ZONE_R && j < fj + ZONE_R; }
-function budget() { return state === S.GHOST ? ghost.left : player.pocket; }
-// ONE deterministic placement rule. Returns '' if OK, otherwise the reason shown to the player.
-function placementCheck(c, type, base) {
+function inZoneOf(fc, c) { if (fc < 0) return false; const fi = fc % N, fj = (fc / N) | 0, i = c % N, j = (c / N) | 0; return i >= fi - ZONE_R && i < fi + ZONE_R && j >= fj - ZONE_R && j < fj + ZONE_R; }
+function budgetOf(who) { if (who === player) return state === S.GHOST ? ghost.left : player.pocket; return GHOST_BUDGET - who.built; }
+function zoneOf(who) { return who === player ? (state === S.GHOST ? ghost.fallCell : -1) : who.fallCell; }
+// THE placement rule — used by the player AND by bots. '' = OK, otherwise the reason.
+function placementCheck(c, type, base, who) {
   if (c < 0) return 'NO SPOT';
+  const i = c % N, j = (c / N) | 0;
+  if (i <= 0 || j <= 0 || i >= N - 1 || j >= N - 1) return 'ARENA EDGE';
   if (perm[c]) return "CAN'T BUILD IN A WALL";
-  if (state === S.GHOST && !inZone(c)) return 'OUTSIDE YOUR BUILD ZONE';
-  const tb = topBlock(c); if (tb && tb.type === T_RAMP) return "CAN'T STACK ON A RAMP";
+  const fc = zoneOf(who); if (fc >= 0 && !inZoneOf(fc, c)) return 'OUTSIDE YOUR BUILD ZONE';
+  const tb = topBlock(c);
+  if (tb && tb.fixed) return "THAT'S A LANDMARK";
+  if (tb && tb.type === T_RAMP) return "CAN'T STACK ON A RAMP";
   if (base + TYPE_H[type] > CEIL + 0.001) return 'TOO HIGH';
-  if (blockCount >= MAX_WORLD_BLOCKS) return 'FORT FULL (' + MAX_WORLD_BLOCKS + ') — BREAK SOME BLOCKS';
-  if (budget() <= 0) return 'NO BLOCKS LEFT';
+  if (blockCount >= MAX_WORLD_BLOCKS) return 'ARENA FULL (' + MAX_WORLD_BLOCKS + ') — BREAK SOME BLOCKS';
+  if (budgetOf(who) <= 0) return 'NO BLOCKS LEFT';
   if (charOverlapsCell(c, base, base + TYPE_H[type])) return 'BLOCKED — SOMEONE IS THERE!';
   return '';
 }
@@ -700,8 +807,9 @@ function cellFits(c, h) {
   const b = topBlock(c); if (b && b.type === T_RAMP) return false;
   return cellTop(c) + h <= CEIL - 0.05;
 }
-function unstick(c) { // safety net: nobody ever stays inside geometry
-  const home = cellAt(c.x, c.z), hi = home % N, hj = (home / N) | 0;
+function unstick(c) {
+  const home = cellAt(c.x, c.z); if (home < 0) { c.x = cx(N * 2 + 2); c.z = cz(N * 2 + 2); return; }
+  const hi = home % N, hj = (home / N) | 0;
   for (let r = 0; r < N; r++) for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) {
     if (Math.max(Math.abs(di), Math.abs(dj)) !== r || !inGrid(hi + di, hj + dj)) continue;
     const n = (hj + dj) * N + hi + di;
@@ -725,8 +833,8 @@ function hasLOS(ax, ay, az, bx, by, bz) {
   return true;
 }
 
-// ---------------- dynamic navigation (grid Dijkstra flow field) ----------------
-const fieldDist = new Float32Array(N * N), fieldNext = new Int32Array(N * N), fieldBreak = new Uint8Array(N * N);
+// ---------------- dynamic navigation (per-bot grid Dijkstra flow fields) ----------------
+function newNav() { return { dist: new Float32Array(N * N), next: new Int32Array(N * N).fill(-1), brk: new Uint8Array(N * N), goal: -1, ver: -1, timer: 0 }; }
 const heapC = new Float32Array(N * N * 8), heapV = new Int32Array(N * N * 8); let hn = 0, popC = 0;
 function hpush(c, v) { let i = hn++; while (i > 0) { const p = (i - 1) >> 1; if (heapC[p] <= c) break; heapC[i] = heapC[p]; heapV[i] = heapV[p]; i = p; } heapC[i] = c; heapV[i] = v; }
 function hpop() {
@@ -736,141 +844,402 @@ function hpop() {
 }
 function canTraverse(u, v, d) {
   if (perm[v]) return false;
-  if (edgeH(v, (d + 2) % 4) - edgeH(u, d) > 1.15) return false; // can step or hop up ≤ 1.15
+  if (edgeH(v, (d + 2) % 4) - edgeH(u, d) > 1.15) return false;
   if (centerH(v) + PLAYER_H > CEIL + 0.01) return false;
   return true;
 }
-// 0 = walkable, >0 = walkable only after breaking blocks (sum of their hp), -1 = never
 function traverseCost(u, v, d) {
   if (canTraverse(u, v, d)) return 0;
   if (perm[v] || !stacks[v].length) return -1;
-  let s = 0; for (const b of stacks[v]) s += b.hp; return s;
+  let s = 0; for (const b of stacks[v]) { if (b.fixed) return -1; s += b.hp; } return s;
 }
-function computeField(goal) {
+function computeField(nav, goal) {
   const t0 = performance.now();
-  fieldDist.fill(Infinity); fieldNext.fill(-1); fieldBreak.fill(0); hn = 0;
-  fieldDist[goal] = 0; hpush(0, goal);
+  const { dist, next, brk } = nav;
+  dist.fill(Infinity); next.fill(-1); brk.fill(0); hn = 0;
+  dist[goal] = 0; hpush(0, goal);
   while (hn > 0) {
-    const v = hpop(), dv = popC; if (dv > fieldDist[v]) continue;
-    const vi = v % N, vj = (v / N) | 0;
+    const v = hpop(), dv = popC; if (dv > dist[v]) continue;
     for (let d = 0; d < 4; d++) {
-      const ui = vi + DX[d], uj = vj + DZ[d]; if (!inGrid(ui, uj)) continue;
-      const u = uj * N + ui; if (perm[u]) continue;
+      const u = stepCell(v, d); if (u < 0 || perm[u]) continue;
       const r = traverseCost(u, v, (d + 2) % 4); if (r < 0) continue;
       const cost = dv + 1 + (water[v] ? 0.3 : 0) + (r > 0 ? 3 + r * 2.5 : 0);
-      if (cost < fieldDist[u]) { fieldDist[u] = cost; fieldNext[u] = v; fieldBreak[u] = r > 0 ? 1 : 0; hpush(cost, u); }
+      if (cost < dist[u]) { dist[u] = cost; next[u] = v; brk[u] = r > 0 ? 1 : 0; hpush(cost, u); }
     }
   }
-  navGoal = goal; navDirty = false; navRecomputes++; navMs = performance.now() - t0;
+  nav.goal = goal; nav.ver = navVersion; navRecomputes++; navMs = performance.now() - t0;
+}
+function requestField(b, goal) {
+  const nav = b.nav; if (goal < 0) return;
+  if ((goal !== nav.goal || nav.ver !== navVersion) && (nav.timer <= 0 || nav.goal < 0) && navBudget > 0) { computeField(nav, goal); nav.timer = 0.2; navBudget--; }
 }
 function dirBetween(a, b) { const ai = a % N, bi = b % N; if (bi > ai) return 0; if (bi < ai) return 2; return b > a ? 1 : 3; }
+function floorConnected() { // every empty floor cell reachable on foot (no breaking)
+  let start = -1, total = 0;
+  for (let c = 0; c < N * N; c++) if (!perm[c] && cellTop(c) === 0) { total++; if (start < 0) start = c; }
+  if (start < 0) return true;
+  const seen = new Uint8Array(N * N), q = [start]; seen[start] = 1; let reached = 1;
+  while (q.length) { const u = q.pop(); for (let d = 0; d < 4; d++) { const v = stepCell(u, d); if (v < 0 || seen[v] || !canTraverse(u, v, d)) continue; seen[v] = 1; q.push(v); if (cellTop(v) === 0) reached++; } }
+  return reached >= total;
+}
 
-// ---------------- characters (bots) ----------------
+// ---------------- landmarks + pre-built cover ----------------
+function nearestOpen(i0, j0, pred) {
+  for (let r = 0; r < N; r++) for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) {
+    if (Math.max(Math.abs(di), Math.abs(dj)) !== r || !inGrid(i0 + di, j0 + dj)) continue;
+    const c = (j0 + dj) * N + i0 + di; if (!perm[c] && !stacks[c].length && pred(c)) return c;
+  }
+  return -1;
+}
+function clearLandmarks() {
+  lmGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach(m => m.dispose()); });
+  lmGroup.clear(); landmarks = [];
+}
+function addMesh(parent, geo, mat, x, y, z) { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); parent.add(m); return m; }
+function placeLandmarks() {
+  clearLandmarks();
+  // 1. EXIT sign over the Yellow Rooms hub
+  { const c = nearestOpen(8, 12, () => true);
+    if (c >= 0) { const g = new THREE.Group(); g.position.set(cx(c), 0, cz(c));
+      const sign = addMesh(g, new THREE.BoxGeometry(1.5, 0.55, 0.18), new THREE.MeshBasicMaterial({ map: texExit }), 0, 3.35, 0); sign.name = 'exit';
+      addMesh(g, new THREE.CylinderGeometry(0.02, 0.02, 0.4, 4), lam(0x333333), -0.5, 3.8, 0); addMesh(g, new THREE.CylinderGeometry(0.02, 0.02, 0.4, 4), lam(0x333333), 0.5, 3.8, 0);
+      const rug = addMesh(g, new THREE.CircleGeometry(1.6, 20).rotateX(-Math.PI / 2), lam(0xb8322a), 0, 0.02, 0);
+      lmGroup.add(g); landmarks.push({ c, icon: 'E', col: '#ff3b2f', name: 'EXIT sign' }); } }
+  // 2. Purple couch (hop on it!)
+  { const c = nearestOpen(3, 3, x => !isWaterZone(x));
+    if (c >= 0) { placeBlock(c, T_PIPE, 0, 'map', true, true);
+      const g = new THREE.Group(); g.position.set(cx(c), 0, cz(c)); const pm = lam(0x7d3cc8);
+      addMesh(g, new THREE.BoxGeometry(1.9, 1, 1.4), pm, 0, 0.5, 0.1); addMesh(g, new THREE.BoxGeometry(1.9, 0.9, 0.4), pm, 0, 1.3, -0.7);
+      addMesh(g, new THREE.BoxGeometry(0.3, 0.5, 1.4), lam(0x5e2a9c), -0.85, 1.2, 0.1); addMesh(g, new THREE.BoxGeometry(0.3, 0.5, 1.4), lam(0x5e2a9c), 0.85, 1.2, 0.1);
+      lmGroup.add(g); landmarks.push({ c, icon: 'C', col: '#b07cff', name: 'Purple Couch' }); } }
+  // 3. Vending machine (tall, must not cut the map in two)
+  for (const [i0, j0] of [[13, 20], [12, 3], [4, 20]]) {
+    const c = nearestOpen(i0, j0, x => !isWaterZone(x) && !landmarks.some(l => l.c === x));
+    if (c < 0) continue;
+    const b = placeBlock(c, T_BRICK, 0, 'map', true, true);
+    if (!floorConnected()) { removeBlock(c, b, true); continue; }
+    const g = new THREE.Group(); g.position.set(cx(c), 0, cz(c));
+    const front = new THREE.MeshBasicMaterial({ map: texVend }); const side = lam(0xa01822);
+    addMesh(g, new THREE.BoxGeometry(1.5, 2, 1.2), [side, side, side, side, front, side], 0, 1, 0);
+    lmGroup.add(g); landmarks.push({ c, icon: 'V', col: '#ff5a6a', name: 'Snack Machine' }); break;
+  }
+  // 4. Captain Clark's ship in the Water Rooms (+ a gangplank to climb aboard)
+  outer: for (const [i0, j0] of [[20, 12], [20, 6], [20, 18]]) {
+    for (let tries = 0; tries < 30; tries++) {
+      const c = nearestOpen(i0 + ((tries % 5) - 2), j0 + (((tries / 5) | 0) - 2), x => water[x]); if (c < 0) continue;
+      for (let d = 0; d < 4; d++) {
+        const gpk = stepCell(c, d); if (gpk < 0 || perm[gpk] || stacks[gpk].length || !water[gpk]) continue;
+        const sb = placeBlock(c, T_BRICK, 0, 'map', true, true);
+        const rb = placeBlock(gpk, T_RAMP, (d + 2) % 4, 'map', true, false);
+        if (!floorConnected()) { removeBlock(gpk, rb, true); removeBlock(c, sb, true); continue; }
+        const g = new THREE.Group(); g.position.set(cx(c), 0, cz(c)); g.rotation.y = Math.atan2(DX[d], DZ[d]);
+        const hull = lam(0x7a4a1c);
+        addMesh(g, new THREE.BoxGeometry(1.9, 1.7, 1.9), hull, 0, 0.95, 0);
+        addMesh(g, new THREE.BoxGeometry(1.95, 0.12, 1.95), lam(0xc58a4a), 0, 1.98, 0);
+        addMesh(g, new THREE.BoxGeometry(1.96, 0.25, 1.96), lam(0x2b59c3), 0, 1.4, 0);
+        const bow = addMesh(g, new THREE.ConeGeometry(0.7, 1.0, 4), hull, 0, 1.2, -1.3); bow.rotation.x = -Math.PI / 2;
+        addMesh(g, new THREE.CylinderGeometry(0.06, 0.06, 1.95, 6), lam(0x5a3412), 0, 3.0, 0.3);
+        const sail = addMesh(g, new THREE.PlaneGeometry(1.2, 1.1), new THREE.MeshLambertMaterial({ map: texSail, side: THREE.DoubleSide }), 0, 3.1, 0.25); sail.name = 'sail';
+        lmGroup.add(g); landmarks.push({ c, icon: '⚓', col: '#ffd24a', name: "Captain Clark's Ship" });
+        break outer;
+      }
+    }
+  }
+  // 5. Giant smiley mural on a Yellow Rooms wall
+  { let done = false;
+    for (let j = 2; j < N - 2 && !done; j++) for (let i = 2; i < DIVIDER_I - 1 && !done; i++) {
+      const c = j * N + i; if (!perm[c] || (i % 4 === 0 && j % 4 === 0) || Math.abs(i - 5) + Math.abs(j - 18) > 7) continue;
+      for (let d = 0; d < 4; d++) { const o = stepCell(c, d); if (o < 0 || perm[o]) continue;
+        const m = addMesh(lmGroup, new THREE.PlaneGeometry(1.8, 1.8), new THREE.MeshLambertMaterial({ map: texSmiley, transparent: true }), cx(c) + DX[d] * (CS / 2 + 0.02), 2.1, cz(c) + DZ[d] * (CS / 2 + 0.02));
+        m.rotation.y = Math.atan2(DX[d], DZ[d]); landmarks.push({ c, icon: '☺', col: '#ffe04a', name: 'Smiley Mural' }); done = true; break; }
+    } }
+}
+// pre-built cover structures (normal destructible blocks, counted in the arena cap)
+const STRUCTS = [
+  [[0, 0, T_BRICK], [1, 0, T_BRICK], [0, 1, T_RAMP, 3]],                 // bunker with a ramp up
+  [[0, 0, T_PIPE], [1, 0, T_PIPE], [2, 0, T_PIPE]],                      // pipe line
+  [[0, 0, T_BRICK], [1, 0, T_RAMP, 2], [0, 1, T_PIPE]],                  // lookout
+  [[0, 0, T_PIPE], [0, 1, T_PIPE], [1, 1, T_PIPE]],                      // pipe corner
+];
+function rotOff(dx, dz, r) { for (let k = 0; k < r; k++) [dx, dz] = [-dz, dx]; return [dx, dz]; }
+function placeStructures(spawnCells) {
+  let placed = 0;
+  for (let tries = 0; tries < 80 && placed < 7; tries++) {
+    const water_ = placed >= 5; // last two in the Water Rooms
+    const tpl = water_ ? STRUCTS[(tries % 2) * 2 + 1] : STRUCTS[tries % STRUCTS.length];
+    const r = (Math.random() * 4) | 0;
+    const ai = 2 + ((Math.random() * (N - 4)) | 0), aj = 2 + ((Math.random() * (N - 4)) | 0);
+    const cells = [];
+    let ok = true;
+    for (const [dx, dz, type, dir] of tpl) {
+      const [rx, rz] = rotOff(dx, dz, r); const i = ai + rx, j = aj + rz;
+      if (!inGrid(i, j) || i < 1 || j < 1 || i > N - 2 || j > N - 2) { ok = false; break; }
+      const c = j * N + i;
+      if (perm[c] || stacks[c].length || isWaterZone(c) !== water_ || landmarks.some(l => l.c === c) || spawnCells.some(s => Math.abs(s % N - i) + Math.abs(((s / N) | 0) - j) < 3)) { ok = false; break; }
+      cells.push([c, type, dir === undefined ? 0 : (dir + r) % 4]);
+    }
+    if (!ok) continue;
+    const made = cells.map(([c, type, dir]) => [c, placeBlock(c, type, dir, 'map')]);
+    if (!floorConnected()) { for (const [c, b] of made.reverse()) removeBlock(c, b, true); continue; }
+    placed++;
+  }
+}
+
+// ---------------- minimap ----------------
+const mmCanvas = $('minimap'), mmG = mmCanvas.getContext('2d'), mmBase = document.createElement('canvas');
+mmBase.width = mmBase.height = 160;
+const MMS = 160 / N;
+function buildMinimapBase() {
+  const g = mmBase.getContext('2d');
+  for (let c = 0; c < N * N; c++) {
+    const i = c % N, j = (c / N) | 0;
+    g.fillStyle = perm[c] ? (i >= DIVIDER_I ? '#2c5d8f' : '#6b5a20') : water[c] ? '#4aa3f0' : '#e8d37a';
+    g.fillRect(i * MMS, j * MMS, MMS + 0.5, MMS + 0.5);
+  }
+  g.font = 'bold 10px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const l of landmarks) { const x = (l.c % N + 0.5) * MMS, y = (((l.c / N) | 0) + 0.5) * MMS; g.fillStyle = '#1d1a10'; g.beginPath(); g.arc(x, y, 5.5, 0, 7); g.fill(); g.fillStyle = l.col; g.fillText(l.icon, x, y + 0.5); }
+}
+function drawMinimap() {
+  const g = mmG; g.drawImage(mmBase, 0, 0);
+  g.fillStyle = 'rgba(120,70,25,.9)';
+  for (let c = 0; c < N * N; c++) { const s = stacks[c]; if (!s.length || s[0].fixed) continue; g.fillRect((c % N) * MMS + 1, ((c / N) | 0) * MMS + 1, MMS - 2, MMS - 2); }
+  if (state === S.GHOST && ghost.fallCell >= 0) { g.strokeStyle = '#8fd0ff'; g.lineWidth = 1; const fi = ghost.fallCell % N, fj = (ghost.fallCell / N) | 0; g.strokeRect((fi - ZONE_R) * MMS, (fj - ZONE_R) * MMS, ZONE_R * 2 * MMS, ZONE_R * 2 * MMS); }
+  for (const b of bots) {
+    const x = (b.ghost ? b.fx : b.x) / CS * MMS, y = (b.ghost ? b.fz : b.z) / CS * MMS;
+    g.beginPath(); g.arc(x, y, 3.6, 0, 7);
+    if (b.ghost) { g.strokeStyle = b.t.color; g.lineWidth = 1.5; g.stroke(); } else { g.fillStyle = b.t.color; g.fill(); g.strokeStyle = '#000'; g.lineWidth = 1; g.stroke(); }
+  }
+  const px = (state === S.GHOST ? ghost.x : player.x) / CS * MMS, pz = (state === S.GHOST ? ghost.z : player.z) / CS * MMS;
+  const fx = -Math.sin(player.yaw), fz = -Math.cos(player.yaw);
+  g.fillStyle = state === S.GHOST ? '#bfe0ff' : '#2b59c3'; g.strokeStyle = '#fff'; g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(px + fx * 7, pz + fz * 7); g.lineTo(px - fx * 4 - fz * 4, pz - fz * 4 + fx * 4); g.lineTo(px - fx * 4 + fz * 4, pz - fz * 4 - fx * 4); g.closePath(); g.fill(); g.stroke();
+}
+
+// ---------------- bots ----------------
 function botMat(c) { return new THREE.MeshLambertMaterial({ color: c, emissive: 0x000000 }); }
 function makeBotMesh(key) {
   const g = new THREE.Group(); const mats = [];
   const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); g.add(m); return m; };
   if (key === 'balloon') {
     const body = botMat(0xffe04a); mats.push(body);
-    const ball = add(new THREE.SphereGeometry(0.58, 14, 10), body, 0, 1.35, 0); ball.name = 'float';
+    add(new THREE.SphereGeometry(0.58, 14, 10), body, 0, 1.35, 0).name = 'float';
     const blk = lam(0x111111);
     add(new THREE.SphereGeometry(0.08, 6, 5), blk, -0.2, 1.48, 0.52); add(new THREE.SphereGeometry(0.08, 6, 5), blk, 0.2, 1.48, 0.52);
-    const smile = add(new THREE.TorusGeometry(0.24, 0.045, 5, 12, Math.PI), blk, 0, 1.3, 0.5); smile.rotation.z = Math.PI;
+    add(new THREE.TorusGeometry(0.24, 0.045, 5, 12, Math.PI), blk, 0, 1.3, 0.5).rotation.z = Math.PI;
     add(new THREE.CylinderGeometry(0.012, 0.012, 0.75, 4), lam(0xffffff), 0, 0.45, 0);
     add(new THREE.ConeGeometry(0.09, 0.12, 6), body, 0, 0.78, 0);
   } else if (key === 'hazmat') {
-    const suit = botMat(0xf2b705); mats.push(suit);
+    const suit = botMat(0xff8c1a); mats.push(suit);
     add(new THREE.CylinderGeometry(0.3, 0.33, 0.85, 8), suit, 0, 0.8, 0);
     add(new THREE.SphereGeometry(0.28, 10, 8), suit, 0, 1.42, 0);
     add(new THREE.BoxGeometry(0.34, 0.16, 0.12), lam(0x103a44), 0, 1.44, 0.22);
     add(new THREE.BoxGeometry(0.36, 0.5, 0.2), lam(0x777777), 0, 0.9, -0.3);
     add(new THREE.BoxGeometry(0.14, 0.4, 0.14), suit, -0.13, 0.2, 0); add(new THREE.BoxGeometry(0.14, 0.4, 0.14), suit, 0.13, 0.2, 0);
     add(new THREE.BoxGeometry(0.1, 0.1, 0.45), lam(0xd63a2a), 0.32, 0.95, 0.2);
+    add(new THREE.CircleGeometry(0.12, 3), lam(0x111111), 0, 0.95, 0.31);
   } else {
     const shell = botMat(0xa0432a); mats.push(shell);
-    const body = add(new THREE.SphereGeometry(0.62, 12, 8), shell, 0, 0.62, 0); body.scale.set(1.25, 0.65, 0.95);
+    add(new THREE.SphereGeometry(0.62, 12, 8), shell, 0, 0.62, 0).scale.set(1.25, 0.65, 0.95);
     for (const s of [-1, 1]) {
-      const claw = add(new THREE.SphereGeometry(0.28, 8, 6), shell, 0.62 * s, 0.6, 0.62); claw.scale.set(1, 0.8, 1.3); claw.name = 'claw';
+      add(new THREE.SphereGeometry(0.28, 8, 6), shell, 0.62 * s, 0.6, 0.62).scale.set(1, 0.8, 1.3);
       add(new THREE.CylinderGeometry(0.04, 0.04, 0.35, 5), shell, 0.2 * s, 1.05, 0.3);
       add(new THREE.SphereGeometry(0.1, 8, 6), lam(0xffffff), 0.2 * s, 1.25, 0.3);
       add(new THREE.SphereGeometry(0.05, 6, 5), lam(0x111111), 0.2 * s, 1.26, 0.39);
-      for (let k = 0; k < 3; k++) { const leg = add(new THREE.BoxGeometry(0.55, 0.06, 0.06), shell, 0.75 * s, 0.3, -0.25 + k * 0.25); leg.rotation.z = -0.5 * s; }
+      for (let k = 0; k < 3; k++) add(new THREE.BoxGeometry(0.55, 0.06, 0.06), shell, 0.75 * s, 0.3, -0.25 + k * 0.25).rotation.z = -0.5 * s;
     }
   }
   g.userData.mats = mats; scene.add(g); return g;
 }
-function createBot(idx) {
-  const t = BOT_TYPES[idx % 3];
-  return { t, name: t.name, x: 0, y: 0, z: 0, vy: 0, h: t.h, half: t.half, hp: t.hp, alive: false, respawnT: 0, group: makeBotMesh(t.key),
-    yaw: 0, fireCd: 1.5, windup: 0, meleeCd: 0, bonkCd: 0, invuln: 0, losT: 0, los: false, flash: 0, score: 0, deaths: 0,
-    strafeDir: 1, strafeT: 0, wanderA: Math.random() * 6.28, wanderT: 0, progT: 0, lastX: 0, lastZ: 0, stuck: 0, breaking: false, lunge: 0, grounded: false, stuckGeom: 0 };
+function setGhostLook(b, on) {
+  b.group.traverse(o => { if (o.material) { o.material.transparent = on; o.material.opacity = on ? 0.35 : 1; o.material.depthWrite = !on; } });
 }
-function chooseBotSpawn(b) {
+function createBot(idx) {
+  const t = BOT_TYPES[ROSTER_ORDER[idx]];
+  const same = ROSTER_ORDER.slice(0, idx).filter(k => k === t.key).length;
+  return { t, name: t.name + (same ? ' ' + (same + 1) : ''), emoji: t.emoji, x: 0, y: 0, z: 0, vy: 0, h: t.h, half: t.half, hp: t.hp,
+    alive: false, ghost: false, group: makeBotMesh(t.key), nav: newNav(), hatCol: new THREE.Color(t.color),
+    yaw: 0, fireCd: 1.5, windup: 0, meleeCd: 0, bonkCd: 0, invuln: 0, losT: 0, los: false, flash: 0, score: 0, deaths: 0, built: 0, totalBuilt: 0,
+    target: null, pickT: 0, perch: -1, perchT: 0, coverT: 0, coverPath: [], patrol: -1, patrolT: 0, forceTarget: null, forceT: 0, mode: '',
+    strafeDir: 1, strafeT: 0, wanderA: Math.random() * 6.28, wanderT: 0, progT: 0, lastX: 0, lastZ: 0, stuck: 0, breaking: false, lunge: 0, grounded: false, stuckGeom: 0,
+    ghostT: 0, fallCell: -1, fx: 0, fy: 0, fz: 0, plan: [], buildT: 0 };
+}
+function chooseSpawn(b, minDist = 16) {
   const cands = [];
-  const refX = state === S.GHOST ? ghost.fx : player.x, refZ = state === S.GHOST ? ghost.fz : player.z;
+  const others = charsPhysical().filter(o => o !== b);
   for (let c = 0; c < N * N; c++) {
     if (perm[c] || stacks[c].length) continue;
-    if (Math.hypot(cx(c) - refX, cz(c) - refZ) < 16) continue;
-    if (state === S.GHOST && inZone(c)) continue;
+    if (others.some(o => Math.hypot(cx(c) - o.x, cz(c) - o.z) < minDist)) continue;
+    if (state === S.GHOST && inZoneOf(ghost.fallCell, c)) continue;
+    if (b.t && b.t.key === 'crab' && !water[c]) continue;
     if (charOverlapsCell(c, 0, CEIL)) continue;
-    if (b.t.key === 'crab' && !water[c]) continue;
     cands.push(c);
   }
-  if (!cands.length) for (let c = 0; c < N * N; c++) if (!perm[c] && cellFits(c, b.h) && !charOverlapsCell(c, 0, CEIL)) cands.push(c);
+  if (!cands.length) for (let c = 0; c < N * N; c++) if (!perm[c] && cellFits(c, b.h) && !charOverlapsCell(c, cellTop(c), cellTop(c) + b.h)) cands.push(c);
   return cands[(Math.random() * cands.length) | 0];
 }
-function spawnBot(b, withFort) {
-  const c = chooseBotSpawn(b);
-  b.x = cx(c); b.z = cz(c); b.y = cellTop(c); b.vy = 0; b.hp = b.t.hp; b.alive = true; b.invuln = 2; b.group.visible = true;
-  b.fireCd = 1.5; b.windup = 0; b.stuck = 0; b.lastX = b.x; b.lastZ = b.z; b.progT = 0;
-  if (withFort) { // simplified bot Bonk-to-Build: a little ring of Splash Pipes (hop-able cover) around its respawn spot
-    const i = c % N, j = (c / N) | 0;
-    for (let d = 0; d < 4; d++) {
-      const n = (j + DZ[d]) * N + i + DX[d];
-      if (!inGrid(i + DX[d], j + DZ[d]) || perm[n] || stacks[n].length || Math.random() < 0.3) continue;
-      if (blockCount >= MAX_WORLD_BLOCKS || charOverlapsCell(n, 0, 1)) continue;
-      placeBlock(n, T_PIPE, 0, 'bot'); burst(cx(n), 0.6, cz(n), 0x3a7bd5, 6);
+function placeBotAt(b, c) {
+  b.x = cx(c); b.z = cz(c); b.y = cellTop(c); b.vy = 0; b.hp = b.t.hp; b.alive = true; b.ghost = false; b.invuln = RESPAWN_INVULN;
+  b.group.visible = true; setGhostLook(b, false);
+  b.fireCd = 1.2; b.windup = 0; b.stuck = 0; b.lastX = b.x; b.lastZ = b.z; b.progT = 0; b.target = null; b.pickT = 0; b.perch = -1; b.coverT = 0; b.coverPath = [];
+  b.fallCell = -1; b.plan = [];
+}
+// Bot Bonk-to-Build: a real little fort — side walls, a back pipe, and a ramp up to a lookout brick.
+function makeFortPlan(F) {
+  const plan = [];
+  const ok = c => c >= 0 && !perm[c] && !stacks[c].length;
+  let d = -1;
+  for (const k of [0, 1, 2, 3].sort(() => Math.random() - 0.5)) { const R = stepCell(F, k), T = R >= 0 ? stepCell(R, k) : -1; if (ok(R) && ok(T)) { d = k; break; } }
+  if (d < 0) d = (Math.random() * 4) | 0;
+  const p1 = (d + 1) % 4, p2 = (d + 3) % 4, back = (d + 2) % 4;
+  const add = (c, type, dir = 0) => { if (c >= 0 && !perm[c]) plan.push({ c, type, dir }); };
+  add(stepCell(F, p1), T_BRICK); add(stepCell(F, p2), T_BRICK); add(stepCell(F, back), T_PIPE);
+  const R = stepCell(F, d);
+  if (R >= 0) { add(R >= 0 ? stepCell(R, d) : -1, T_BRICK); add(R, T_RAMP, d); add(stepCell(R, p1), T_PIPE); add(stepCell(R, p2), T_PIPE); }
+  return plan;
+}
+function botEnterGhost(b) {
+  b.alive = false; b.ghost = true; b.ghostT = GHOST_TIME; b.built = 0; b.buildT = 1.5;
+  b.fallCell = cellAt(b.x, b.z); b.fx = b.x; b.fz = b.z; b.fy = b.y;
+  b.plan = makeFortPlan(b.fallCell); b.target = null; b.windup = 0;
+  setGhostLook(b, true);
+}
+function updateBotGhost(b, dt) {
+  b.ghostT -= dt; b.buildT -= dt;
+  if (b.buildT <= 0 && b.plan.length) {
+    b.buildT = 4.5;
+    // try plan items in order; skip ones that are no longer valid (same rules as the player)
+    while (b.plan.length) {
+      const p = b.plan.shift(), base = cellTop(p.c);
+      if (!placementCheck(p.c, p.type, base, b)) {
+        placeBlock(p.c, p.type, p.dir, b.name); b.built++; b.totalBuilt++;
+        burst(cx(p.c), base + 0.5, cz(p.c), BLOCK_COL[p.type], 8, 3, 2, 0.5);
+        if (Math.hypot(cx(p.c) - camera.position.x, cz(p.c) - camera.position.z) < 14) sfx('place');
+        break;
+      }
     }
   }
+  if (b.ghostT <= 0) respawnBot(b);
 }
-function bonkBot(b) {
-  b.alive = false; b.group.visible = false; b.respawnT = 4 + Math.random() * 2; b.deaths++;
-  player.score++; sfx('botBonk'); popup('+1 BONK!');
-  burst(b.x, b.y + 1, b.z, 0xffe14a, 18, 5, 5, 1); burst(b.x, b.y + 1, b.z, 0x2b59c3, 10, 4, 4, 1);
+function respawnBot(b) {
+  const c = findSafeSpawn(b.fallCell, b.h, false);
+  placeBotAt(b, c); burst(b.x, b.y + 1, b.z, 0xffffff, 12, 4, 4, 0.7);
 }
-function botFire(b) {
+function bonkBot(b, src) {
+  if (!b.alive) return;
+  b.alive = false; b.deaths++;
+  burst(b.x, b.y + 1, b.z, 0xffe14a, 18, 5, 5, 1); burst(b.x, b.y + 1, b.z, b.t.color, 10, 4, 4, 1);
+  if (src === player) { sfx('botBonk'); popup('+1 BONK!'); } else sfx('farBonk');
+  feed(src ? `${src.emoji} ${src.name} bonked ${b.emoji} ${b.name}` : `${b.emoji} ${b.name} got bonked`);
+  if (overtime) { endMatch({ winner: src || null, reason: src ? `${src.name} landed the Sudden Bonk!` : 'Sudden Bonk ended.' }); return; }
+  if (src && src !== b) src.score++;
+  botEnterGhost(b);
+}
+function playerHelpless() { return state === S.GHOST || state === S.RESPAWNING; }
+function validTarget(b, T) { if (!T || T === b) return false; if (T === player) return state === S.PLAYING; return T.alive && !playerHelpless(); }
+function pickTarget(b) {
+  if (b.forceT > 0 && validTarget(b, b.forceTarget)) return b.forceTarget;
+  const cands = []; if (state === S.PLAYING) cands.push(player);
+  if (!playerHelpless()) for (const o of bots) if (o !== b && o.alive) cands.push(o);
+  let best = null, bs = 1e9;
+  for (const c of cands) {
+    const d = Math.hypot(c.x - b.x, c.z - b.z);
+    if (b.t.role === 'tank' && d > 14 && !water[cellAt(c.x, c.z)]) continue; // Crab Boss guards the Water Rooms
+    let s = d;
+    if (c === b.target) s *= 0.8;                                            // a little stickiness
+    if (d < 20 && hasLOS(b.x, b.y + b.h * 0.8, b.z, c.x, c.y + c.h * 0.6, c.z)) s *= 0.6; // prefer what it can see
+    const crowd = bots.filter(o => o !== b && o.alive && o.target === c).length;
+    s *= 1 + 0.45 * crowd;                                                   // spread out — don't all gang up on one target
+    if (c === player && player.invuln > 0) s *= 1.6;                         // shielded player is a poor target
+    if (s < bs) { bs = s; best = c; }
+  }
+  return best;
+}
+function pickPatrol(b) {
+  for (let k = 0; k < 60; k++) { const c = (Math.random() * N * N) | 0; if (perm[c] || cellTop(c) !== 0) continue; if (b.t.role === 'tank' && !water[c]) continue; return c; }
+  return cellAt(b.x, b.z);
+}
+function findPerch(b, T) { // Hazmat: a raised spot (block top, ramp-reachable) with a view of the target
+  const tc = cellAt(T.x, T.z); if (tc < 0) return -1;
+  const ti = tc % N, tj = (tc / N) | 0; let best = -1, bd = 1e9;
+  for (let dj = -6; dj <= 6; dj++) for (let di = -6; di <= 6; di++) {
+    if (!inGrid(ti + di, tj + dj)) continue; const c = (tj + dj) * N + ti + di;
+    if (perm[c]) continue; const tb = topBlock(c); if (!tb || tb.type === T_RAMP) continue;
+    const top = cellTop(c); if (top < 0.9 || !cellFits(c, b.h)) continue;
+    const d = Math.hypot(cx(c) - b.x, cz(c) - b.z); if (d >= bd) continue;
+    if (!hasLOS(cx(c), top + b.h * 0.8, cz(c), T.x, T.y + T.h * 0.6, T.z)) continue;
+    best = c; bd = d;
+  }
+  return best;
+}
+function findCoverPath(b, T) { // Hazmat: short walk to a cell the target can't see
+  const start = cellAt(b.x, b.z); if (start < 0) return [];
+  const prev = new Map([[start, -1]]), depth = new Map([[start, 0]]), q = [start]; let qi = 0;
+  while (qi < q.length) {
+    const u = q[qi++], du = depth.get(u);
+    if (u !== start && !hasLOS(T.x, T.y + T.h * 0.7, T.z, cx(u), cellTop(u) + 1.2, cz(u))) {
+      const path = []; let c = u; while (c !== start) { path.unshift(c); c = prev.get(c); } return path;
+    }
+    if (du >= 5) continue;
+    for (let d = 0; d < 4; d++) { const v = stepCell(u, d); if (v < 0 || prev.has(v) || perm[v] || !canTraverse(u, v, d)) continue; prev.set(v, u); depth.set(v, du + 1); q.push(v); }
+  }
+  return [];
+}
+function botFire(b, T) {
   const d = DIFF[settings.diff];
   const ex = b.x, ey = b.y + b.h * 0.75, ez = b.z;
-  let tx = player.x, ty = player.y + 1.1, tz = player.z;
+  let tx = T.x, ty = T.y + T.h * 0.65, tz = T.z;
   if (Math.random() < d.miss) { const a = Math.random() * 6.28; tx += Math.cos(a) * 1.6; tz += Math.sin(a) * 1.6; ty += (Math.random() - 0.3) * 1.2; }
   const dx = tx - ex, dy = ty - ey, dz = tz - ez, dist = Math.hypot(dx, dy, dz) || 1;
   const t = dist / HAT_SPEED;
   spawnHat(ex + dx / dist * 0.6, ey, ez + dz / dist * 0.6, dx / dist * HAT_SPEED, dy / dist * HAT_SPEED + 0.5 * HAT_GRAV * t, dz / dist * HAT_SPEED, b);
-  sfx('thwip');
+  if (Math.hypot(ex - camera.position.x, ez - camera.position.z) < 18) sfx('thwip');
 }
 function updateBot(b, dt) {
-  if (!b.alive) { b.respawnT -= dt; if (b.respawnT <= 0 && state !== S.ENDED) spawnBot(b, true); return; }
-  b.fireCd -= dt; b.meleeCd -= dt; b.bonkCd -= dt; b.invuln -= dt; b.losT -= dt; b.flash -= dt; b.lunge = Math.max(0, b.lunge - dt * 4);
+  if (b.ghost) { updateBotGhost(b, dt); return; }
+  if (!b.alive) return;
+  b.fireCd -= dt; b.meleeCd -= dt; b.bonkCd -= dt; b.invuln -= dt; b.losT -= dt; b.flash -= dt; b.nav.timer -= dt;
+  b.coverT -= dt; b.perchT -= dt; b.pickT -= dt; b.forceT -= dt; b.lunge = Math.max(0, b.lunge - dt * 4);
   const ci = cellAt(b.x, b.z); if (ci < 0) { unstick(b); return; }
-  const fight = state === S.PLAYING, ghostMode = state === S.GHOST;
-  const pdx = player.x - b.x, pdz = player.z - b.z, pdist = Math.hypot(pdx, pdz) || 0.001;
-  if (b.losT <= 0) { b.losT = 0.15 + Math.random() * 0.05; b.los = fight && pdist < b.t.range + 6 && hasLOS(b.x, b.y + b.h * 0.8, b.z, player.x, player.y + 1.2, player.z); }
-  if (!fight) b.los = false;
-  let mode = 'path';
-  if (fight && b.los && pdist < b.t.range) {
-    if (b.t.role === 'rusher') mode = (pdist < 3.5 && Math.abs(player.y - b.y) < 0.6) ? 'direct' : 'path';
-    else if (b.t.role === 'flanker') mode = pdist < 5 ? 'retreat' : pdist < 10 ? 'strafe' : 'path';
-    else mode = pdist < 11 ? 'strafe' : 'path';
+  const helpless = playerHelpless();
+  if (b.pickT <= 0 || !validTarget(b, b.target)) { const nt = pickTarget(b); if (nt !== b.target) { b.perch = -1; b.perchT = 0; } b.target = nt; b.pickT = 1.1 + Math.random() * 0.5; }
+  const T = b.target;
+  let tdx = 0, tdz = 0, tdist = 1e9;
+  if (T) {
+    tdx = T.x - b.x; tdz = T.z - b.z; tdist = Math.hypot(tdx, tdz) || 0.001;
+    if (b.losT <= 0) { b.losT = 0.15 + Math.random() * 0.05; b.los = tdist < b.t.range + 6 && hasLOS(b.x, b.y + b.h * 0.8, b.z, T.x, T.y + T.h * 0.65, T.z); }
+  } else b.los = false;
+  let mode = 'wander', goal = -1, spdMul = 1;
+  if (T) {
+    goal = cellAt(T.x, T.z); mode = 'path';
+    const role = b.t.role;
+    if (role === 'rusher') { if (b.los && tdist < 3.5 && Math.abs(T.y - b.y) < 0.6) mode = 'direct'; }
+    else if (role === 'tank') { if (b.los && tdist < 11) mode = 'strafe'; }
+    else {
+      if (b.coverT > 0 && b.coverPath.length) mode = 'cover';
+      else {
+        if (b.perchT <= 0) { b.perchT = 3; b.perch = tdist < 18 ? findPerch(b, T) : -1; }
+        if (b.perch >= 0) { goal = b.perch; if (ci === b.perch) mode = 'hold'; }
+        else if (b.los && tdist < 5) mode = 'retreat';
+        else if (b.los && tdist < 10) mode = 'strafe';
+      }
+    }
+  } else if (helpless && ghost.fallCell >= 0) { // gravitate toward the player's newest fort, but don't wreck it mid-build
+    goal = ghost.fallCell; mode = Math.hypot(ghost.fx - b.x, ghost.fz - b.z) < 7.5 ? 'wander' : 'path';
+  } else {
+    b.patrolT -= dt;
+    if (b.patrol < 0 || ci === b.patrol || b.patrolT <= 0) { b.patrol = pickPatrol(b); b.patrolT = 14; }
+    goal = b.patrol; mode = 'path'; spdMul = 0.7;
   }
-  if (ghostMode && Math.hypot(ghost.fx - b.x, ghost.fz - b.z) < 7.5) mode = 'wander';
-  if (!fight && !ghostMode) mode = 'wander';
-  if (mode === 'path' && (fieldNext[ci] < 0 || ci === navGoal)) mode = fight ? 'direct' : 'wander';
-  let wx = 0, wz = 0, spd = b.t.speed; b.breaking = false;
+  if (goal >= 0) requestField(b, goal);
+  const nav = b.nav;
+  if (mode === 'path' && (nav.next[ci] < 0 || ci === goal)) mode = T ? 'direct' : 'wander';
+  b.mode = mode;
+  let wx = 0, wz = 0, spd = b.t.speed * spdMul; b.breaking = false;
   if (mode === 'path') {
-    const nxt = fieldNext[ci], d = dirBetween(ci, nxt);
+    const nxt = nav.next[ci], d = dirBetween(ci, nxt);
     const ex = (cx(ci) + cx(nxt)) / 2, ez = (cz(ci) + cz(nxt)) / 2;
-    if (fieldBreak[ci]) {
-      if (ghostMode) { /* don't wreck a fort while it's being built */ }
+    if (nav.brk[ci]) {
+      if (helpless) { /* wait — no fort-wrecking while the player is helpless */ }
       else if (Math.hypot(ex - b.x, ez - b.z) < b.half + 0.6) {
         b.breaking = true; b.yaw = Math.atan2(ex - b.x, ez - b.z);
         if (b.bonkCd <= 0) { const tb = topBlock(nxt); if (tb) { damageBlock(nxt, tb); b.lunge = 1; } b.bonkCd = 0.5; }
@@ -880,40 +1249,62 @@ function updateBot(b, dt) {
       const rise = edgeH(nxt, (d + 2) % 4) - edgeH(ci, d);
       if (rise > 0.35 && b.grounded && Math.hypot(ex - b.x, ez - b.z) < 1.1) b.vy = JUMP_V;
     }
-  } else if (mode === 'direct') { wx = pdx; wz = pdz; if (pdist < b.half + HALF + 0.15) { wx = wz = 0; } }
-  else if (mode === 'retreat') { wx = -pdx; wz = -pdz; spd *= 0.8; }
-  else if (mode === 'strafe') { b.strafeT -= dt; if (b.strafeT <= 0) { b.strafeT = 1.4 + Math.random() * 1.2; b.strafeDir *= -1; } wx = -pdz / pdist * b.strafeDir; wz = pdx / pdist * b.strafeDir; spd *= 0.7; }
-  else { b.wanderT -= dt; if (b.wanderT <= 0 || b.hitWall) { b.wanderT = 1 + Math.random() * 1.5; b.wanderA = Math.random() * 6.28; } wx = Math.cos(b.wanderA); wz = Math.sin(b.wanderA); spd *= 0.45; }
+  } else if (mode === 'direct') { wx = tdx; wz = tdz; if (T && tdist < b.half + T.half + 0.15) { wx = wz = 0; } }
+  else if (mode === 'retreat') { wx = -tdx; wz = -tdz; spd *= 0.8; }
+  else if (mode === 'strafe' || mode === 'hold') {
+    b.strafeT -= dt; if (b.strafeT <= 0) { b.strafeT = 1.4 + Math.random() * 1.2; b.strafeDir *= -1; }
+    wx = -tdz / tdist * b.strafeDir; wz = tdx / tdist * b.strafeDir; spd *= mode === 'hold' ? 0.25 : 0.7;
+    if (mode === 'hold' && !b.los) b.perch = -1;
+  } else if (mode === 'cover') {
+    const nc = b.coverPath[0];
+    if (Math.hypot(cx(nc) - b.x, cz(nc) - b.z) < 0.45) b.coverPath.shift();
+    if (b.coverPath.length) { const c2 = b.coverPath[0]; wx = cx(c2) - b.x; wz = cz(c2) - b.z; spd *= 1.1;
+      const d = dirBetween(ci, c2); if (c2 !== ci && edgeH(c2, (d + 2) % 4) - edgeH(ci, d) > 0.35 && b.grounded) b.vy = JUMP_V; }
+  } else { b.wanderT -= dt; if (b.wanderT <= 0 || b.hitWall) { b.wanderT = 1 + Math.random() * 1.5; b.wanderA = Math.random() * 6.28; } wx = Math.cos(b.wanderA); wz = Math.sin(b.wanderA); spd *= 0.45; }
   const wl = Math.hypot(wx, wz);
   if (wl > 0.05) { wx /= wl; wz /= wl; } else { wx = wz = 0; }
   if (b.hitWall && mode === 'strafe') b.strafeDir *= -1;
-  if (water[ci] && b.y < 0.4) spd *= WATER_SLOW;
+  if (water[ci] && b.y < 0.4) { spd *= WATER_SLOW; if ((wx || wz) && Math.random() < dt * 3) burst(b.x, 0.15, b.z, 0x9ad4ff, 2, 2, 2, 0.4); }
   moveChar(b, dt, wx * spd, wz * spd);
   // progress / stuck detection
   b.progT += dt;
   if (b.progT > 1) {
     const moved = Math.hypot(b.x - b.lastX, b.z - b.lastZ);
-    if ((wx || wz) && moved < 0.3 && !b.breaking) {
-      b.stuck++; if (b.grounded) b.vy = JUMP_V; b.strafeDir *= -1; b.wanderA = Math.random() * 6.28; navDirty = true;
-      if (b.stuck >= 2 && fight) { // bonk whatever player-built block is in front of us
+    if ((wx || wz) && moved < 0.3 && !b.breaking && mode !== 'hold') {
+      b.stuck++; if (b.grounded) b.vy = JUMP_V; b.strafeDir *= -1; b.wanderA = Math.random() * 6.28; b.nav.ver = -1; b.coverPath = [];
+      if (b.stuck >= 2 && !helpless) {
         const fc = cellAt(b.x + wx * 1.2, b.z + wz * 1.2);
         if (fc >= 0 && fc !== ci && !perm[fc] && stacks[fc].length) { damageBlock(fc, topBlock(fc)); b.lunge = 1; }
       }
     } else b.stuck = 0;
     b.progT = 0; b.lastX = b.x; b.lastZ = b.z;
   }
-  if (!b.breaking) { if (b.los) b.yaw = Math.atan2(pdx, pdz); else if (wl > 0.05) b.yaw = Math.atan2(wx, wz); }
+  if (!b.breaking) { if (b.los) b.yaw = Math.atan2(tdx, tdz); else if (wl > 0.05) b.yaw = Math.atan2(wx, wz); }
   // attacks
-  if (fight && b.los && pdist < b.t.range) {
-    if (b.windup > 0) { b.windup -= dt; if (b.windup <= 0) { botFire(b); b.fireCd = DIFF[settings.diff].interval * (0.8 + Math.random() * 0.4); } }
-    else if (b.fireCd <= 0) { b.windup = DIFF[settings.diff].windup; sfx('windup'); }
+  if (T && b.los && tdist < b.t.range && mode !== 'cover') {
+    if (b.windup > 0) {
+      b.windup -= dt;
+      if (b.windup <= 0) {
+        botFire(b, T);
+        let iv = DIFF[settings.diff].interval * (0.8 + Math.random() * 0.4);
+        if (b.t.role === 'rusher' && tdist < 6) iv *= 0.55; // Balloon fires fast up close
+        b.fireCd = iv;
+        if (b.t.role === 'flanker') { b.coverPath = findCoverPath(b, T); b.coverT = b.coverPath.length ? 1.8 : 0; } // duck behind cover after shooting
+      }
+    } else if (b.fireCd <= 0) { b.windup = DIFF[settings.diff].windup; if (T === player) sfx('windup'); }
   } else b.windup = 0;
-  if (fight && b.t.role !== 'flanker' && pdist < b.half + HALF + 0.6 && Math.abs(player.y - b.y) < 1.2 && b.meleeCd <= 0) {
-    b.meleeCd = 1.2; b.lunge = 1; damagePlayer(1, b);
+  if (T && b.t.role !== 'flanker' && tdist < b.half + T.half + 0.6 && Math.abs(T.y - b.y) < 1.2 && b.meleeCd <= 0) {
+    b.meleeCd = 1.2; b.lunge = 1; damageChar(T, 1, b);
   }
 }
 function updateBotVisual(b, t) {
-  const g = b.group; if (!b.alive) return;
+  const g = b.group;
+  if (b.ghost) {
+    g.visible = true;
+    g.position.set(b.fx + Math.sin(t * 1.3 + b.fx) * 0.7, b.fy + 1.3 + Math.sin(t * 2.2) * 0.15, b.fz + Math.cos(t * 1.3 + b.fx) * 0.7);
+    g.rotation.y = t * 0.8; return;
+  }
+  if (!b.alive) { g.visible = false; return; }
   g.position.set(b.x, b.y, b.z); g.rotation.y = b.yaw;
   const f = g.getObjectByName('float'); if (f) f.position.y = 1.35 + Math.sin(t * 3 + b.x) * 0.08;
   const fl = b.flash > 0 ? 0.6 : (b.windup > 0 ? 0.35 + 0.3 * Math.sin(t * 40) : 0);
@@ -922,13 +1313,24 @@ function updateBotVisual(b, t) {
   g.position.x += Math.sin(b.yaw) * b.lunge * 0.3; g.position.z += Math.cos(b.yaw) * b.lunge * 0.3;
 }
 
-// ---------------- hats (pooled, swept collision) ----------------
+// ---------------- damage / scoring ----------------
+function damageChar(ch, amount, src) {
+  if (ch === player) { damagePlayer(amount, src); return; }
+  if (!ch.alive) return;
+  if (ch.invuln > 0) { sfx('sparkle'); return; }
+  if (src && src !== player && playerHelpless()) { sfx('sparkle'); return; } // bot-vs-bot scoring paused while the player builds
+  ch.hp -= amount; ch.flash = 0.15;
+  if (src === player || Math.hypot(ch.x - camera.position.x, ch.z - camera.position.z) < 14) sfx('boink');
+  if (ch.hp <= 0) bonkBot(ch, src);
+}
+
+// ---------------- hats (pooled, swept collision, bounded life, hard cap) ----------------
 function spawnHat(x, y, z, vx, vy, vz, owner) {
   let h = null;
   for (let k = 0; k < MAX_HATS; k++) { const c = hats[(hatPtr + k) % MAX_HATS]; if (!c.on) { h = c; hatPtr = (hatPtr + k + 1) % MAX_HATS; break; } }
-  if (!h) { h = hats[hatPtr]; hatPtr = (hatPtr + 1) % MAX_HATS; } // hard cap: recycle
+  if (!h) { h = hats[hatPtr]; hatPtr = (hatPtr + 1) % MAX_HATS; }
   Object.assign(h, { on: true, x, y, z, vx, vy, vz, life: HAT_LIFE, owner, spin: 0 });
-  hatIM.setColorAt(h.i, owner === player ? HAT_COL_P : HAT_COL_B); hatIM.instanceColor.needsUpdate = true;
+  hatIM.setColorAt(h.i, owner === player ? HAT_COL_P : owner.hatCol); hatIM.instanceColor.needsUpdate = true;
 }
 function pointHitsChar(c, x, y, z, r) { return y >= c.y - r && y <= c.y + c.h + r && Math.abs(x - c.x) < c.half + r && Math.abs(z - c.z) < c.half + r; }
 function updateHats(dt) {
@@ -938,28 +1340,25 @@ function updateHats(dt) {
     const ox = h.x, oy = h.y, oz = h.z;
     h.vy -= HAT_GRAV * dt;
     const nx = ox + h.vx * dt, ny = oy + h.vy * dt, nz = oz + h.vz * dt;
-    const n = Math.max(1, Math.ceil(Math.hypot(nx - ox, ny - oy, nz - oz) / 0.15)); // sub-steps smaller than any wall
+    const n = Math.max(1, Math.ceil(Math.hypot(nx - ox, ny - oy, nz - oz) / 0.15));
     let hit = false;
     for (let k = 1; k <= n && !hit; k++) {
       const t = k / n, px = ox + (nx - ox) * t, py = oy + (ny - oy) * t, pz = oz + (nz - oz) * t;
       if (h.owner !== player && state === S.PLAYING && pointHitsChar(player, px, py, pz, 0.22)) {
-        if (player.invuln > 0) { sfx('sparkle'); burst(px, py, pz, 0x9fe8ff, 6, 3, 2, 0.4); }
-        else damagePlayer(1, h.owner);
+        if (player.invuln > 0) { sfx('sparkle'); burst(px, py, pz, 0x9fe8ff, 6, 3, 2, 0.4); } else damagePlayer(1, h.owner);
         hit = true; break;
       }
-      if (h.owner === player) {
-        for (const b of bots) if (b.alive && pointHitsChar(b, px, py, pz, 0.22)) {
-          if (b.invuln > 0) { sfx('sparkle'); burst(px, py, pz, 0x9fe8ff, 6, 3, 2, 0.4); }
-          else { b.hp--; b.flash = 0.15; sfx('boink'); burst(px, py, pz, 0xffffff, 6, 3, 2, 0.4); if (b.hp <= 0) bonkBot(b); }
-          hit = true; break;
-        }
-        if (hit) break;
+      for (const b of bots) if (b !== h.owner && b.alive && pointHitsChar(b, px, py, pz, 0.22)) {
+        if (b.invuln > 0 || (h.owner !== player && playerHelpless())) { burst(px, py, pz, 0x9fe8ff, 6, 3, 2, 0.4); if (h.owner === player) sfx('sparkle'); }
+        else { burst(px, py, pz, 0xffffff, 6, 3, 2, 0.4); damageChar(b, 1, h.owner); }
+        hit = true; break;
       }
+      if (hit) break;
       const c = cellAt(px, pz);
       if (c < 0 || py >= CEIL - 0.03) { hit = true; break; }
-      if (py <= 0.03) { if (water[c]) { sfx('splash'); burst(px, 0.15, pz, 0x7cc4ff, 8, 3, 3, 0.6); } else burst(px, 0.1, pz, 0x1b2a6b, 4, 2, 2, 0.4); hit = true; break; }
+      if (py <= 0.03) { if (water[c]) { burst(px, 0.15, pz, 0x7cc4ff, 8, 3, 3, 0.6); if (h.owner === player) sfx('splash'); } else burst(px, 0.1, pz, 0x1b2a6b, 4, 2, 2, 0.4); hit = true; break; }
       if (py < heightInCell(c, px, pz)) {
-        if (!perm[c]) { const b = blockAtY(c, py); if (b) damageBlock(c, b); } else { sfx('clack'); burst(px, py, pz, 0xdcc65a, 4, 2, 2, 0.35); }
+        if (!perm[c]) { const b = blockAtY(c, py); if (b) damageBlock(c, b); } else { if (h.owner === player) sfx('clack'); burst(px, py, pz, 0xdcc65a, 4, 2, 2, 0.35); }
         hit = true; break;
       }
     }
@@ -993,8 +1392,11 @@ function damagePlayer(amount, src) {
   if (player.hp <= 0) bonkPlayer(src);
 }
 function bonkPlayer(src) {
-  if (src && src !== player && src.score !== undefined) src.score++;
-  player.bonked++; player.hp = 0; sfx('bonked'); popup('BONKED!');
+  player.bonked++; player.hp = 0; sfx('bonked');
+  feed(src ? `${src.emoji} ${src.name} bonked ${player.emoji} You` : `${player.emoji} You got bonked`);
+  if (overtime) { endMatch({ winner: src || null, reason: src ? `${src.name} landed the Sudden Bonk!` : 'Sudden Bonk ended.' }); return; }
+  if (src && src !== player) src.score++;
+  popup('BONKED!');
   timeScale = 0.3; slowmoT = 0.6; shake = 0.6;
   enterGhost();
 }
@@ -1015,85 +1417,127 @@ function enterGhost() {
   fallen.position.set(player.x, player.y, player.z); fallen.rotation.y = player.yaw; fallen.visible = true;
   const fi = fc % N, fj = (fc / N) | 0;
   zoneLine.position.set((fi - ZONE_R) * CS, 0.06, (fj - ZONE_R) * CS); zoneLine.scale.set(ZONE_R * 2 * CS, 1, ZONE_R * 2 * CS); zoneLine.visible = true;
-  $('ghostUI').classList.remove('hidden'); $('ghostTint').classList.remove('hidden'); $('btnRespawn').classList.remove('hidden');
-  navDirty = true;
+  ['ghostUI', 'ghostTint', 'btnRespawn', 'pauseNote'].forEach(id => $(id).classList.remove('hidden'));
+  for (const b of bots) b.target = null;
   setTimeout(() => { if (state === S.GHOST) sfx('ghost'); }, 450);
 }
 function respawnNow() {
   if (state !== S.GHOST) return;
   if (!setState(S.RESPAWNING)) return;
   resp.t = 0; resp.fx = ghost.x; resp.fy = ghost.y; resp.fz = ghost.z;
-  resp.cell = findSafeSpawn(ghost.fallCell);
+  resp.cell = findSafeSpawn(ghost.fallCell, PLAYER_H, true);
   resp.tx = cx(resp.cell); resp.tz = cz(resp.cell); resp.ty = cellTop(resp.cell) + 1.55;
-  $('ghostUI').classList.add('hidden'); $('ghostTint').classList.add('hidden'); $('btnRespawn').classList.add('hidden');
+  ['ghostUI', 'ghostTint', 'btnRespawn'].forEach(id => $(id).classList.add('hidden'));
   preview.visible = remBox.visible = false;
 }
-// Validate a full player-sized body at the respawn spot. Prefer the fall spot (inside your fort),
-// then search outward inside the build zone; if nothing fits, clear the fall spot.
-function findSafeSpawn(fc) {
+// Validate a full body at the respawn spot: prefer the fall spot (inside the fort), then search outward
+// within the build zone; if nothing fits, clear the fall spot. Used by the player AND bots.
+function findSafeSpawn(fc, h, isPlayer) {
+  if (fc < 0) fc = cellAt(player.x, player.z);
   const fi = fc % N, fj = (fc / N) | 0;
   for (let r = 0; r <= ZONE_R; r++) for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) {
     if (Math.max(Math.abs(di), Math.abs(dj)) !== r || !inGrid(fi + di, fj + dj)) continue;
     const c = (fj + dj) * N + fi + di;
-    if (cellFits(c, PLAYER_H) && !charOverlapsCell(c, cellTop(c), cellTop(c) + PLAYER_H)) return c;
+    if (cellFits(c, h) && !charOverlapsCell(c, cellTop(c), cellTop(c) + h)) return c;
   }
-  while (stacks[fc].length) removeBlock(fc, topBlock(fc));
-  burst(cx(fc), 1, cz(fc), 0xffffff, 16, 5, 4, 0.8); showMsg('Your fort was packed solid — cleared a spot!', 2.5);
+  for (const b of [...stacks[fc]].reverse()) removeBlock(fc, b);
+  burst(cx(fc), 1, cz(fc), 0xffffff, 16, 5, 4, 0.8);
+  if (isPlayer) showMsg('Your fort was packed solid — cleared a spot!', 2.5);
   return fc;
 }
 function finishRespawn() {
   if (state !== S.RESPAWNING) return;
-  if (!cellFits(resp.cell, PLAYER_H) || charOverlapsCell(resp.cell, cellTop(resp.cell), cellTop(resp.cell) + PLAYER_H)) resp.cell = findSafeSpawn(resp.cell);
+  if (!cellFits(resp.cell, PLAYER_H) || charOverlapsCell(resp.cell, cellTop(resp.cell), cellTop(resp.cell) + PLAYER_H)) resp.cell = findSafeSpawn(resp.cell, PLAYER_H, true);
   player.x = cx(resp.cell); player.z = cz(resp.cell); player.y = cellTop(resp.cell); player.vy = 0;
   player.hp = 3; player.invuln = RESPAWN_INVULN; player.hitCd = 0;
   setState(S.PLAYING); buildMode = false;
   flagGroup.visible = fallen.visible = zoneLine.visible = false; ghost.fallCell = -1;
-  sfx('respawn'); popup('BACK IN!'); navDirty = true;
+  $('pauseNote').classList.add('hidden');
+  sfx('respawn'); popup('BACK IN!');
 }
-function endMatch() {
+function participants() { return [player, ...bots]; }
+function onTimeUp() {
+  const all = participants(), max = Math.max(...all.map(p => p.score));
+  const leaders = all.filter(p => p.score === max);
+  if (leaders.length === 1) endMatch({ winner: leaders[0], reason: 'Time! Most bonks wins.' });
+  else startOvertime(leaders);
+}
+function startOvertime(leaders) {
+  overtime = true; otT = OVERTIME_T;
+  if (state === S.GHOST) respawnNow();
+  if (state === S.RESPAWNING) finishRespawn();
+  for (const b of bots) if (b.ghost) { b.plan = []; respawnBot(b); }
+  for (const h of hats) h.on = false;
+  // everyone to spread-out safe active positions
+  const chosen = [];
+  const cands = []; for (let c = 0; c < N * N; c++) if (cellFits(c, 1.8) && cellTop(c) === 0) cands.push(c);
+  for (const ch of participants()) {
+    let best = -1, bd = -1;
+    for (let k = 0; k < 160; k++) {
+      const c = cands[(Math.random() * cands.length) | 0];
+      const d = chosen.length ? Math.min(...chosen.map(o => Math.hypot(cx(o) - cx(c), cz(o) - cz(c)))) : 99;
+      if (d > bd) { bd = d; best = c; }
+    }
+    chosen.push(best);
+    ch.x = cx(best); ch.z = cz(best); ch.y = cellTop(best); ch.vy = 0; ch.invuln = 2;
+    if (ch === player) { player.hp = 3; } else { ch.hp = ch.t.hp; ch.target = null; ch.coverPath = []; ch.perch = -1; }
+  }
+  buildMode = false;
+  sfx('horn'); popup('⚡ SUDDEN BONK! ⚡');
+  showMsg(`Tied at ${leaders[0].score}! First bonk wins — you have 30 seconds!`, 4);
+}
+function endMatch(res) {
   if (state === S.TITLE || state === S.ENDED) return;
   setState(S.ENDED); paused = false;
   if (document.pointerLockElement) document.exitPointerLock();
-  $('ghostUI').classList.add('hidden'); $('ghostTint').classList.add('hidden'); $('btnRespawn').classList.add('hidden'); $('pause').classList.add('hidden');
+  ['ghostUI', 'ghostTint', 'btnRespawn', 'pause', 'pauseNote'].forEach(id => $(id).classList.add('hidden'));
   preview.visible = remBox.visible = false;
-  const best = bots.reduce((m, b) => Math.max(m, b.score), 0);
-  $('endTitle').textContent = player.score > best ? '🏆 YOU WIN!' : player.score === best ? "🤝 IT'S A TIE!" : '🎈 The bots win this time!';
-  $('endStats').innerHTML = `Your bonks: <b>${player.score}</b> · Times bonked: <b>${player.bonked}</b> · Blocks built: <b>${player.built}</b><br>` +
-    bots.map(b => `${b.name}: ${b.score} bonks`).join(' · ') +
-    `<br><span class="small">Prototype: ties end as a tie (Sudden Bonk overtime comes in the full game).</span>`;
+  const w = res.winner;
+  $('endTitle').textContent = res.draw ? '🤝 NOBODY BONKED — DRAW' : w === player ? '🏆 YOU WIN!' : w ? `${w.emoji} ${w.name} wins!` : '🤝 DRAW';
+  $('endReason').textContent = res.reason || '';
+  const rows = participants().slice().sort((a, b) => b.score - a.score);
+  $('endBoard').innerHTML = rows.map(p => `<tr class="${p === w ? 'win' : ''}"><td>${p.emoji} ${p.name}</td><td>${p.score} bonk${p.score === 1 ? '' : 's'}</td><td>bonked ${p === player ? player.bonked : p.deaths}×</td><td>${p === player ? player.built : p.totalBuilt} blocks built</td></tr>`).join('');
+  $('endStats').innerHTML = `<span class="small">Pirate Planks, Backroom Bricks and Splash Pipes on the map at the end: ${blockCount}/${MAX_WORLD_BLOCKS}</span>`;
   $('end').classList.remove('hidden'); setHud(false);
+  if (w === player) sfx('fanfare');
 }
 
 // ---------------- match setup ----------------
 function clearWorld() {
-  for (const s of stacks) s.length = 0; blockCount = 0; blocksDirty = navDirty = true;
+  for (const s of stacks) s.length = 0; blockCount = 0; blocksDirty = true; navVersion++;
   for (const h of hats) h.on = false; for (const p of parts) p.life = 0;
-  for (const b of bots) scene.remove(b.group); bots = [];
+  for (const b of bots) { b.group.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach(m => m.dispose()); }); scene.remove(b.group); }
+  bots = [];
 }
 function resetMatch() {
   clearWorld();
-  genMaze((Math.random() * 1e9) | 0); buildMazeMeshes();
-  let c, tries = 0;
-  do { c = (Math.random() * N * N) | 0; tries++; } while ((perm[c] || water[c]) && tries < 5000);
-  Object.assign(player, { x: cx(c), z: cz(c), y: 0, vy: 0, hp: 3, invuln: RESPAWN_INVULN, hitCd: 0, fireCd: 0, score: 0, bonked: 0, built: 0, pocket: POCKET_MAX, pocketT: 0, pitch: 0, yaw: Math.random() * 6.28 });
+  genMaze((Math.random() * 1e9) | 0);
+  placeLandmarks();
   state = S.PLAYING; // spawn checks use PLAYING rules
-  for (let k = 0; k < settings.bots; k++) { const b = createBot(k); bots.push(b); spawnBot(b, false); }
+  let c, tries = 0;
+  do { c = (Math.random() * N * N) | 0; tries++; } while ((perm[c] || water[c] || stacks[c].length || Math.hypot(cx(c) - 17, cz(c) - 25) < 4) && tries < 5000);
+  Object.assign(player, { x: cx(c), z: cz(c), y: 0, vy: 0, hp: 3, invuln: RESPAWN_INVULN, hitCd: 0, fireCd: 0, score: 0, bonked: 0, built: 0, pocket: POCKET_MAX, pocketT: 0, pitch: 0, yaw: Math.random() * 6.28 });
+  for (let k = 0; k < settings.bots; k++) { const b = createBot(k); bots.push(b); placeBotAt(b, chooseSpawn(b, 14)); b.invuln = 1; }
+  placeStructures([cellAt(player.x, player.z), ...bots.map(b => cellAt(b.x, b.z))]);
+  buildMazeMeshes(); buildMinimapBase();
   matchT = MATCH_TIME; timeScale = 1; slowmoT = 0; buildMode = false; selType = T_BRICK; ghost.fallCell = -1;
+  overtime = false; otT = 0;
   flagGroup.visible = fallen.visible = zoneLine.visible = false; autoFireT = 0;
   transitionsLog.length = 0; transitionsLog.push('TITLE→PLAYING');
+  $('feed').innerHTML = '';
 }
 function startMatch(mode) {
   initAudio(); inputMode = mode;
-  ['title', 'end', 'pause'].forEach(id => $(id).classList.add('hidden'));
-  if (state !== S.TITLE && state !== S.ENDED) { state = S.TITLE; }
+  ['title', 'end', 'pause', 'pauseNote'].forEach(id => $(id).classList.add('hidden'));
+  state = S.TITLE;
   resetMatch(); paused = false; setHud(true);
   if (mode === 'mouse') lockPointer();
-  showMsg('GO! Bonk the bots with hats!', 2);
+  showMsg('GO! Bonk the bots with hats! (Red EXIT sign = middle of the Yellow Rooms)', 3);
 }
 function quitToTitle() {
   if (state !== S.TITLE) { if (state !== S.ENDED) setState(S.TITLE); else state = S.TITLE; }
   paused = false; if (document.pointerLockElement) document.exitPointerLock();
-  ['pause', 'end', 'ghostUI', 'ghostTint', 'btnRespawn'].forEach(id => $(id).classList.add('hidden'));
+  ['pause', 'end', 'ghostUI', 'ghostTint', 'btnRespawn', 'pauseNote'].forEach(id => $(id).classList.add('hidden'));
   $('title').classList.remove('hidden'); setHud(false);
   flagGroup.visible = fallen.visible = zoneLine.visible = preview.visible = remBox.visible = false;
 }
@@ -1177,11 +1621,11 @@ function tryPlace() {
 }
 function tryRemove() {
   const t = buildTarget; if (!t || !t.rem) return;
-  if (state === S.GHOST && !inZone(t.remCell)) { showMsg('OUTSIDE YOUR BUILD ZONE', 1.2); sfx('deny'); return; }
+  if (t.rem.fixed) { showMsg("THAT'S A LANDMARK", 1.2); sfx('deny'); return; }
+  if (state === S.GHOST && !inZoneOf(ghost.fallCell, t.remCell)) { showMsg('OUTSIDE YOUR BUILD ZONE', 1.2); sfx('deny'); return; }
   removeBlock(t.remCell, t.rem); sfx('remove'); burst(cx(t.remCell), t.rem.base + 0.5, cz(t.remCell), BLOCK_COL[t.rem.type], 8, 3, 2, 0.5);
   if (state === S.GHOST) ghost.left = Math.min(GHOST_BUDGET, ghost.left + 1); else player.pocket = Math.min(POCKET_MAX, player.pocket + 1);
 }
-// raycast from the eye into the heightfield → where a block would go / which block would be removed
 function updateBuildTarget() {
   const building = state === S.GHOST || (state === S.PLAYING && buildMode);
   if (!building || paused) { preview.visible = remBox.visible = false; buildTarget = null; return; }
@@ -1197,15 +1641,15 @@ function updateBuildTarget() {
   if (!hit) { preview.visible = remBox.visible = false; buildTarget = null; return; }
   const pc = hit.face === 'side' ? hit.place : hit.cell;
   const base = cellTop(pc);
-  const fx = camD.x, fz = camD.z;
-  const dir = Math.abs(fx) > Math.abs(fz) ? (fx > 0 ? 0 : 2) : (fz > 0 ? 1 : 3);
-  const reason = perm[pc] ? "CAN'T BUILD IN A WALL" : placementCheck(pc, selType, base);
+  const dir = Math.abs(camD.x) > Math.abs(camD.z) ? (camD.x > 0 ? 0 : 2) : (camD.z > 0 ? 1 : 3);
+  const reason = placementCheck(pc, selType, base, player);
   let rem = null; if (!perm[hit.cell] && stacks[hit.cell].length) rem = hit.face === 'top' ? topBlock(hit.cell) : blockAtY(hit.cell, hit.y);
+  if (rem && rem.hidden) rem = null;
   buildTarget = { cell: pc, base, dir, reason, rem, remCell: hit.cell };
   preview.geometry = BLOCK_GEO[selType]; preview.visible = !perm[pc] && base < CEIL;
   preview.position.set(cx(pc), base + 0.01, cz(pc)); preview.rotation.y = selType === T_RAMP ? RAMP_ROT[dir] : 0;
   previewMat.color.set(reason ? 0xff4a3a : 0x55ff77);
-  if (rem) { remBox.visible = true; remBox.position.set(cx(hit.cell), rem.base, cz(hit.cell)); remBox.scale.set(1, rem.h, 1); } else remBox.visible = false;
+  if (rem && !rem.fixed) { remBox.visible = true; remBox.position.set(cx(hit.cell), rem.base, cz(hit.cell)); remBox.scale.set(1, rem.h, 1); } else remBox.visible = false;
 }
 
 // ---------------- gamepad ----------------
@@ -1216,7 +1660,7 @@ function pollPad() {
   let gp = null; const list = navigator.getGamepads ? navigator.getGamepads() : [];
   for (const p of list) if (p && p.connected) { gp = p; break; }
   if (!gp) {
-    if (pad.on) { pad.on = false; $('padStatus').textContent = 'Controller disconnected.'; showMsg('Controller disconnected', 2); if (isActive() && inputMode === 'pad' && !paused) pauseGame('Controller disconnected — plug it back in, then press Start or click RESUME.'); }
+    if (pad.on) { pad.on = false; pad.b = []; pad.lx = pad.ly = pad.rx = pad.ry = 0; $('padStatus').textContent = 'Controller disconnected.'; showMsg('Controller disconnected', 2); if (isActive() && inputMode === 'pad' && !paused) pauseGame('Controller disconnected — plug it back in, then press Start or click RESUME.'); }
     return;
   }
   if (!pad.on) { pad.on = true; pad.id = gp.id; showMsg('🎮 Controller connected', 2); }
@@ -1229,7 +1673,6 @@ function pollPad() {
   const any = pad.b.some(Boolean) || pad.lx || pad.ly || pad.rx || pad.ry;
   if (!any) return;
   pad.used = performance.now();
-  // menus
   if (state === S.TITLE && !$('title').classList.contains('hidden') && (pressed(0) || pressed(9))) { startMatch('pad'); return; }
   if (state === S.ENDED && pressed(0)) { startMatch('pad'); return; }
   if (!isActive()) return;
@@ -1259,33 +1702,43 @@ function drawPadTest() {
 // ---------------- HUD ----------------
 let msgT = 0;
 function showMsg(t, d = 1.5) { $('msg').textContent = t; msgT = d; }
-function popup(t) { const d = document.createElement('div'); d.className = 'pop'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 1000); }
+function popup(t) { const d = document.createElement('div'); d.className = 'pop'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 1100); }
+function feed(t) { const f = $('feed'), d = document.createElement('div'); d.textContent = t; f.prepend(d); while (f.children.length > 3) f.lastChild.remove(); setTimeout(() => d.remove(), 4500); }
 function setHud(on) { ['hudTL', 'hudTop', 'hudTR', 'cross', 'hotbar'].forEach(id => $(id).classList.toggle('hidden', !on)); if (!on) { $('arrow').classList.add('hidden'); $('shieldTxt').classList.add('hidden'); $('shield').style.opacity = 0; } }
 function setDebug(on) { settings.debug = on; $('setDebug').value = on ? '1' : '0'; $('debug').classList.toggle('hidden', !on); dbgLines.visible = on; }
 const hudCache = {};
 function setText(id, t) { if (hudCache[id] !== t) { hudCache[id] = t; $(id).textContent = t; } }
-let fpsFrames = 0, fpsTime = 0, fpsVal = 60, lowFpsWindows = 0;
+let fpsFrames = 0, fpsTime = 0, fpsVal = 60, lowFpsWindows = 0, highFpsWindows = 0, lastScaleChange = 0, boardT = 0, mmT = 0;
 function updateHUD(dt) {
   setText('hearts', state === S.GHOST ? '👻👻👻' : '❤️'.repeat(Math.max(0, player.hp)) + '🖤'.repeat(Math.max(0, 3 - player.hp)));
-  setText('score', 'BONKS ' + player.score);
-  const m = Math.max(0, Math.ceil(matchT)); setText('timer', Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'));
-  setText('capTxt', 'FORT BLOCKS ' + blockCount + '/' + MAX_WORLD_BLOCKS);
+  if (overtime) { const s = Math.max(0, Math.ceil(otT)); setText('timer', '⚡ 0:' + String(s).padStart(2, '0')); }
+  else { const m = Math.max(0, Math.ceil(matchT)); setText('timer', Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0')); }
+  $('timer').classList.toggle('ot', overtime); $('otBanner').classList.toggle('hidden', !overtime);
+  setText('capTxt', 'BLOCKS ' + blockCount + '/' + MAX_WORLD_BLOCKS);
   $('capFill').style.width = (blockCount / MAX_WORLD_BLOCKS * 100).toFixed(1) + '%';
   setText('pocketTxt', state === S.GHOST ? 'GHOST BLOCKS ' + ghost.left + '/' + GHOST_BUDGET : 'POCKET ' + player.pocket + '/' + POCKET_MAX);
   for (let t = 0; t < 3; t++) $('slot' + t).classList.toggle('sel', selType === t);
-  const building = state === S.GHOST || buildMode;
   setText('modeLbl', state === S.GHOST ? 'GHOST BUILD' : buildMode ? 'BUILD (B)' : 'FIGHT (B to build)');
-  $('cross').classList.toggle('build', building);
+  $('cross').classList.toggle('build', state === S.GHOST || buildMode);
   if (state === S.GHOST) {
     setText('gCount', String(Math.max(0, Math.ceil(ghost.t))));
     setText('gInfo', 'Build your fort! Blocks left: ' + ghost.left);
     $('gCount').style.color = ghost.t < 10 ? '#ffd24a' : '#fff';
   }
+  boardT -= dt;
+  if (boardT <= 0) {
+    boardT = 0.2;
+    const rows = participants().slice().sort((a, b) => b.score - a.score);
+    $('board').innerHTML = rows.map(p => {
+      const st = p === player ? (state === S.GHOST ? ` 👻${Math.ceil(ghost.t)}` : '') : (p.ghost ? ` 👻${Math.ceil(p.ghostT)}` : '');
+      return `<div class="r ${p === player ? 'me' : ''} ${(p.ghost || (p === player && state === S.GHOST)) ? 'gh' : ''}"><span>${p.emoji} ${p.name}${st}</span><b>${p.score}</b></div>`;
+    }).join('');
+  }
+  mmT -= dt; if (mmT <= 0) { mmT = 0.12; drawMinimap(); }
   const inv = state === S.PLAYING && player.invuln > 0;
   $('shield').style.opacity = inv ? (0.5 + 0.5 * Math.sin(gameTime * 12)).toFixed(2) : 0;
   $('shieldTxt').classList.toggle('hidden', !inv);
   if (msgT > 0) { msgT -= dt; if (msgT <= 0) $('msg').textContent = ''; }
-  // edge arrow toward nearest bot that's off-screen
   let best = null, bd = 1e9; const e = eye();
   for (const b of bots) if (b.alive) { const d = Math.hypot(b.x - e.x, b.z - e.z); if (d < bd) { bd = d; best = b; } }
   const ar = $('arrow');
@@ -1296,8 +1749,8 @@ function updateHUD(dt) {
     else {
       tmpV.set(best.x, best.y + 1, best.z).applyMatrix4(camera.matrixWorldInverse);
       const ang = Math.atan2(tmpV.x, -tmpV.z);
-      const rx = innerWidth * 0.42, ry = innerHeight * 0.40;
-      ar.style.transform = `translate(${Math.sin(ang) * rx - 18}px,${-Math.cos(ang) * ry - 17}px) rotate(${ang}rad)`;
+      ar.style.transform = `translate(${Math.sin(ang) * innerWidth * 0.42 - 18}px,${-Math.cos(ang) * innerHeight * 0.40 - 17}px) rotate(${ang}rad)`;
+      ar.style.borderBottomColor = best.t.color;
       ar.classList.remove('hidden');
     }
   } else ar.classList.add('hidden');
@@ -1308,20 +1761,23 @@ function updateDebug() {
   const lines = [
     `FPS ${fpsVal.toFixed(0)}  scale ${renderScale.toFixed(2)}  ${fps15 ? '[15 FPS TEST]' : ''}`,
     `draw calls ${info.calls}  tris ${info.triangles}`,
-    `state ${state}${paused ? ' (paused)' : ''}  input ${inputMode}  lock ${document.pointerLockElement === canvas}`,
-    `blocks ${blockCount}/${MAX_WORLD_BLOCKS}  hats ${hats.filter(h => h.on).length}/${MAX_HATS}`,
-    `nav recomputes ${navRecomputes}  last ${navMs.toFixed(2)}ms  goal ${navGoal}`,
-    ...bots.map(b => `${b.name.padEnd(15)} ${b.alive ? 'alive' : 'bonked'} hp${b.hp} cell ${cellAt(b.x, b.z)}→${fieldNext[cellAt(b.x, b.z)] ?? '-'}${b.breaking ? ' BREAKING' : ''}${b.los ? ' LOS' : ''}${b.stuck ? ' stuck' + b.stuck : ''}`),
+    `state ${state}${paused ? ' (paused)' : ''}${overtime ? ' OVERTIME' : ''}  input ${inputMode}  lock ${document.pointerLockElement === canvas}`,
+    `blocks ${blockCount}/${MAX_WORLD_BLOCKS}  hats ${hats.filter(h => h.on).length}/${MAX_HATS}  botScoringPaused ${playerHelpless()}`,
+    `nav recomputes ${navRecomputes}  last ${navMs.toFixed(2)}ms  ver ${navVersion}`,
+    ...bots.map(b => {
+      const c = cellAt(b.x, b.z);
+      return b.ghost ? `${b.name.padEnd(17)} GHOST ${Math.ceil(b.ghostT)}s built ${b.built} plan ${b.plan.length}`
+        : `${b.name.padEnd(17)} hp${b.hp} ${String(b.mode).padEnd(7)} → ${b.target ? b.target.name : '-'}  cell ${c}→${b.nav.next[c] ?? '-'}${b.breaking ? ' BREAK' : ''}${b.los ? ' LOS' : ''}${b.perch >= 0 ? ' perch' : ''}${b.stuck ? ' stuck' + b.stuck : ''}`;
+    }),
     `log: ${transitionsLog.slice(-4).join(', ')}`,
   ];
   $('debug').textContent = lines.join('\n');
-  // path lines
   let s = 0;
   for (const b of bots) {
     if (!b.alive) continue;
     let c = cellAt(b.x, b.z);
-    for (let k = 0; k < 40 && c >= 0 && fieldNext[c] >= 0 && s < MAX_SEG; k++) {
-      const n = fieldNext[c], br = fieldBreak[c];
+    for (let k = 0; k < 40 && c >= 0 && b.nav.next[c] >= 0 && s < MAX_SEG; k++) {
+      const n = b.nav.next[c], br = b.nav.brk[c];
       dbgPos.set([cx(c), cellTop(c) + 0.25, cz(c), cx(n), Math.min(CEIL - 0.1, cellTop(n)) + 0.25, cz(n)], s * 6);
       const col = br ? [1, 0.15, 0.1] : [0.1, 1, 0.3]; dbgCol.set([...col, ...col], s * 6);
       s++; c = n;
@@ -1358,9 +1814,10 @@ function updateGhost(dt) {
   ghost.y = Math.max(0.8, Math.min(CEIL - 0.25, ghost.y));
 }
 function fixedUpdate(dt) {
+  navBudget = 2;
   if (state === S.PLAYING) updatePlayer(dt);
   else if (state === S.GHOST) updateGhost(dt);
-  for (const b of bots) updateBot(b, dt);
+  for (const b of bots) { updateBot(b, dt); if (state === S.ENDED) return; }
   const ch = charsPhysical();
   for (let i = 0; i < ch.length; i++) for (let j = i + 1; j < ch.length; j++) separate(ch[i], ch[j]);
   updateHats(dt);
@@ -1368,9 +1825,8 @@ function fixedUpdate(dt) {
 function frameUpdate(dt, wdt) {
   gameTime += dt;
   if (slowmoT > 0) { slowmoT -= dt; if (slowmoT <= 0) timeScale = 1; }
-  matchT -= dt;
-  if (matchT <= 0) { endMatch(); return; } // MATCH_ENDED overrides every state
-  // look (keys / pad) — works with or without pointer lock
+  if (!overtime) { matchT -= dt; if (matchT <= 0) { matchT = 0; onTimeUp(); if (state === S.ENDED) return; } }
+  else { otT -= dt; if (otT <= 0) { endMatch({ draw: true, reason: '30 seconds of Sudden Bonk and nobody landed a hat.' }); return; } }
   const turn = ((keys.has('KeyQ') || keys.has('ArrowLeft')) ? 1 : 0) - ((keys.has('KeyE') || keys.has('ArrowRight')) ? 1 : 0);
   const tilt = (keys.has('ArrowUp') ? 1 : 0) - (keys.has('ArrowDown') ? 1 : 0);
   player.yaw += (turn * 2.4 - pad.rx * 3.0) * settings.sens * dt;
@@ -1390,18 +1846,14 @@ function frameUpdate(dt, wdt) {
   } else if (state === S.RESPAWNING) {
     resp.t += dt; if (resp.t >= 0.8) finishRespawn();
   }
-  // navigation: recompute when blocks change or the goal cell changes (throttled)
-  navTimer -= dt;
-  const goal = state === S.GHOST ? ghost.fallCell : cellAt(player.x, player.z);
-  if (goal >= 0 && (navDirty || goal !== navGoal) && navTimer <= 0) { computeField(goal); navTimer = 0.12; }
   if (blocksDirty) rebuildBlocks();
   updateParticles(wdt); drawHats();
   for (const b of bots) updateBotVisual(b, gameTime);
-  // water + flag animation
   texWater.offset.x = (gameTime * 0.05) % 1; texWater.offset.y = (gameTime * 0.03) % 1;
-  if (flagGroup.visible) { const bm = flagGroup.getObjectByName('beam'); bm.material.opacity = 0.2 + 0.12 * Math.sin(gameTime * 5); flagGroup.getObjectByName('flag').rotation.y = Math.sin(gameTime * 2) * 0.2; }
+  if (flagGroup.visible) { flagGroup.getObjectByName('beam').material.opacity = 0.2 + 0.12 * Math.sin(gameTime * 5); flagGroup.getObjectByName('flag').rotation.y = Math.sin(gameTime * 2) * 0.2; }
   if (fallen.visible) { let k = 0; fallen.traverse(o => { if (o.name === 'star') { const a = gameTime * 3 + k * 2.1; o.position.set(Math.cos(a) * 0.4, 0.5, -1.4 + Math.sin(a) * 0.4); o.rotation.y = a; k++; } }); }
-  // water splashes for the player
+  const sail = lmGroup.getObjectByName('sail'); if (sail) sail.rotation.y = Math.sin(gameTime * 1.5) * 0.15;
+  const ex = lmGroup.getObjectByName('exit'); if (ex) ex.material.color.setScalar(0.85 + 0.15 * Math.sin(gameTime * 7));
   const pc = cellAt(player.x, player.z);
   if (state === S.PLAYING && pc >= 0 && water[pc] && player.y < 0.4 && (keys.size || pad.lx || pad.ly) && Math.random() < dt * 6) { burst(player.x, 0.15, player.z, 0x9ad4ff, 3, 2, 2, 0.4); if (Math.random() < 0.3) sfx('splash'); }
 }
@@ -1416,31 +1868,33 @@ function placeCamera(dt) {
   const showGun = state === S.PLAYING && !buildMode, showBlock = state === S.GHOST || (state === S.PLAYING && buildMode);
   viewmodel.visible = showGun; handBlock.visible = showBlock;
   viewmodel.position.set(0.32, -0.3 + Math.sin(bob * 2) * 0.012, -0.55 + recoil * 0.09);
-  if (showBlock) { handBlock.material.map = [texBrick, texPlank, texPipe][selType]; handBlock.rotation.y = gameTime; }
+  if (showBlock) { handBlock.material.map = BLOCK_TEX[selType][0]; handBlock.rotation.y = gameTime; }
 }
 function titleCamera(dt) {
   gameTime += dt;
-  camera.position.set(N * CS / 2 + 1, 1.6, N * CS / 2 + 1);
+  camera.position.set(N * CS / 2 - 8, 1.6, N * CS / 2 + 1);
   camera.rotation.set(-0.05, gameTime * 0.12, 0);
   viewmodel.visible = handBlock.visible = false;
 }
 
-// ---------------- Test Lab (prototype gate) ----------------
+// ---------------- Test Lab ----------------
 function testSeal() {
   if (state !== S.PLAYING) { showMsg('Test needs you alive and playing.', 2); return; }
-  const b = bots.find(x => x.alive); if (!b) { showMsg('No bot alive right now — try again in a few seconds.', 2); return; }
-  computeField(cellAt(player.x, player.z));
+  const alive = bots.filter(x => x.alive); if (!alive.length) { showMsg('No bot alive right now — try again in a few seconds.', 2); return; }
+  const b = alive.reduce((m, x) => Math.hypot(x.x - player.x, x.z - player.z) > Math.hypot(m.x - player.x, m.z - player.z) ? x : m);
+  const scratch = newNav(); computeField(scratch, cellAt(player.x, player.z));
   const path = []; let c = cellAt(b.x, b.z);
-  for (let k = 0; k < 80 && c >= 0 && fieldNext[c] >= 0; k++) { c = fieldNext[c]; path.push(c); }
+  for (let k = 0; k < 80 && c >= 0 && scratch.next[c] >= 0; k++) { c = scratch.next[c]; path.push(c); }
   if (path.length < 3) { showMsg('Bot is too close — walk away from it and run the test again.', 2.5); return; }
   const mid = Math.floor(path.length / 2), c0 = path[mid], c1 = path[mid + 1] ?? path[mid - 1];
   const d = dirBetween(c0, c1), perp = (d + 1) % 4;
   const cells = [c0];
-  for (const s of [perp, (perp + 2) % 4]) { let i = c0 % N, j = (c0 / N) | 0; for (let k = 0; k < 4; k++) { i += DX[s]; j += DZ[s]; if (!inGrid(i, j) || perm[j * N + i]) break; cells.push(j * N + i); } }
+  for (const s of [perp, (perp + 2) % 4]) { let n = c0; for (let k = 0; k < 4; k++) { n = stepCell(n, s); if (n < 0 || perm[n]) break; cells.push(n); } }
   let n = 0;
-  for (const x of cells) while (cellTop(x) + 2 <= CEIL && blockCount < MAX_WORLD_BLOCKS && !charOverlapsCell(x, cellTop(x), cellTop(x) + 2)) { placeBlock(x, T_BRICK, 0, 'test'); n++; }
+  for (const x of cells) while (cellTop(x) + 2 <= CEIL && blockCount < MAX_WORLD_BLOCKS && !(topBlock(x) && (topBlock(x).fixed || topBlock(x).type === T_RAMP)) && !charOverlapsCell(x, cellTop(x), cellTop(x) + 2)) { placeBlock(x, T_BRICK, 0, 'test'); n++; }
+  b.forceTarget = player; b.forceT = 20; b.target = player;
   setDebug(true);
-  showMsg(`TEST 1: sealed the bot's route (${n} bricks, floor to ceiling). Watch the green path reroute — red = it will bonk through.`, 6);
+  showMsg(`TEST 1: sealed ${b.name}'s route to you (${n} bricks). Watch the green path reroute — red = it will bonk through.`, 6);
 }
 function testPrison() {
   if (state === S.PLAYING) bonkPlayer(null);
@@ -1448,34 +1902,51 @@ function testPrison() {
   const fc = ghost.fallCell, fi = fc % N, fj = (fc / N) | 0; let n = 0;
   for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
     if (!inGrid(fi + di, fj + dj)) continue; const c = (fj + dj) * N + fi + di; if (perm[c]) continue;
-    while (cellTop(c) + 2 <= CEIL && blockCount < MAX_WORLD_BLOCKS && !charOverlapsCell(c, cellTop(c), cellTop(c) + 2)) { placeBlock(c, T_BRICK, 0, 'test'); n++; }
+    while (cellTop(c) + 2 <= CEIL && blockCount < MAX_WORLD_BLOCKS && !(topBlock(c) && (topBlock(c).fixed || topBlock(c).type === T_RAMP)) && !charOverlapsCell(c, cellTop(c), cellTop(c) + 2)) { placeBlock(c, T_BRICK, 0, 'test'); n++; }
   }
   ghost.autoT = 2;
   showMsg(`TEST 2: your fall spot + neighbors sealed to the ceiling (${n} bricks). Auto RESPAWN NOW in 2s…`, 4);
 }
 function testStress() {
   if (!isActive()) return;
-  while (bots.length < 5) { const b = createBot(bots.length); bots.push(b); spawnBot(b, false); }
+  while (bots.length < 5) { const b = createBot(bots.length); bots.push(b); placeBotAt(b, chooseSpawn(b, 10)); }
   let tries = 0;
   while (blockCount < 100 && tries++ < 4000) {
     const c = (Math.random() * N * N) | 0; if (perm[c]) continue;
     const t = [T_BRICK, T_PIPE, T_PIPE, T_RAMP][(Math.random() * 4) | 0];
-    if (topBlock(c) && topBlock(c).type === T_RAMP) continue;
+    const tb = topBlock(c); if (tb && (tb.type === T_RAMP || tb.fixed)) continue;
     if (cellTop(c) + TYPE_H[t] > 3 || charOverlapsCell(c, cellTop(c), cellTop(c) + TYPE_H[t])) continue;
     placeBlock(c, t, (Math.random() * 4) | 0, 'test');
   }
   autoFireT = 20; setDebug(true);
   showMsg('TEST 3: 100 blocks, 5 bots, auto-fire for 20s. Check the FPS chip (goal 30+).', 5);
 }
+function testTie() {
+  const max = Math.max(...participants().map(p => p.score));
+  for (const p of participants()) p.score = max;
+  if (overtime) { showMsg('Already in Sudden Bonk.', 2); return; }
+  matchT = Math.min(matchT, 2);
+  showMsg(`TEST 7: everyone tied at ${max}. Clock ends in 2s → Sudden Bonk.`, 3);
+}
+function testBotFort() {
+  const alive = bots.filter(b => b.alive); if (!alive.length) { showMsg('No bot alive right now.', 2); return; }
+  const b = alive.reduce((m, x) => Math.hypot(x.x - player.x, x.z - player.z) < Math.hypot(m.x - player.x, m.z - player.z) ? x : m);
+  if (overtime) { showMsg('Not during Sudden Bonk (a bonk would end the match).', 2.5); return; }
+  bonkBot(b, player);
+  for (const x of bots) if (x.ghost && x === b) { x.buildT = 0.5; }
+  showMsg(`TEST 8: bonked ${b.name}. Watch it build a fort (it places a block every ~4s), then respawn inside after 60s. Check the scoreboard.`, 5);
+}
 function runTest(name) {
   if (name === 'debug') { setDebug(!settings.debug); return; }
   if (!isActive()) return;
-  if (name === 'fps15') { fps15 = !fps15; showMsg(fps15 ? 'TEST 4: game forced to 15 FPS — try to clip through walls with hats or sprinting.' : '15 FPS test off', 4); }
-  else if (name === 'end10') { matchT = Math.min(matchT, 10); showMsg('TEST 5: match ends in 10 seconds — try dying / respawning right at the end.', 4); }
+  if (name === 'fps15') { fps15 = !fps15; showMsg(fps15 ? 'TEST 4: forced to 15 FPS — try to clip through walls with hats or sprinting.' : '15 FPS test off', 4); }
+  else if (name === 'end10') { if (overtime) otT = Math.min(otT, 10); else matchT = Math.min(matchT, 10); showMsg('TEST 5: the clock ends in 10 seconds — try dying / respawning right at the end.', 4); }
   else if (name === 'bonk') { if (state === S.PLAYING) bonkPlayer(null); }
   else if (name === 'seal') testSeal();
   else if (name === 'prison') testPrison();
   else if (name === 'stress') testStress();
+  else if (name === 'tie') testTie();
+  else if (name === 'botfort') testBotFort();
 }
 document.querySelectorAll('[data-test]').forEach(btn => btn.addEventListener('click', e => {
   e.currentTarget.blur(); const t = e.currentTarget.dataset.test;
@@ -1490,7 +1961,7 @@ onClick('btnPlayKeys', () => startMatch('keys'));
 onClick('btnResume', () => { initAudio(); resumeGame(false); });
 onClick('btnNoLock', () => { inputMode = 'keys'; paused = false; $('pause').classList.add('hidden'); showMsg('Keyboard look: Q/E or arrows to turn, F to throw/place', 3); });
 onClick('btnQuit', quitToTitle);
-onClick('btnAgain', () => startMatch(inputMode === 'pad' ? 'pad' : inputMode));
+onClick('btnAgain', () => startMatch(inputMode));
 onClick('btnEndTitle', quitToTitle);
 onClick('btnRespawn', () => respawnNow());
 $('setBots').addEventListener('change', e => settings.bots = +e.target.value);
@@ -1502,7 +1973,7 @@ $('setDebug').addEventListener('change', e => setDebug(e.target.value === '1'));
 window.addEventListener('gamepadconnected', () => showMsg('🎮 Controller connected', 2));
 
 // ---------------- main loop ----------------
-genMaze(12345); buildMazeMeshes();
+genMaze(12345); placeLandmarks(); buildMazeMeshes();
 let last = performance.now(), lastRender = 0, acc = 0;
 function frame(now) {
   requestAnimationFrame(frame);
@@ -1514,29 +1985,36 @@ function frame(now) {
   else if (isActive() && !paused) {
     const wdt = dt * timeScale;
     acc += wdt; let steps = 0;
-    while (acc >= FIXED && steps < 12) { fixedUpdate(FIXED); acc -= FIXED; steps++; }
-    if (steps >= 12) acc = 0; // never spiral; at very low FPS the game slows instead of tunnelling
-    frameUpdate(dt, wdt);
-    if (isActive()) { updateBuildTarget(); placeCamera(dt); }
-    updateHUD(dt);
+    while (acc >= FIXED && steps < 12 && isActive()) { fixedUpdate(FIXED); acc -= FIXED; steps++; }
+    if (steps >= 12) acc = 0; // never spiral: at very low FPS the game slows down instead of tunnelling
+    if (isActive()) frameUpdate(dt, wdt);
+    if (isActive()) { updateBuildTarget(); placeCamera(dt); updateHUD(dt); }
   }
+  if (blocksDirty) rebuildBlocks();
   renderer.render(scene, camera);
   updateDebug();
-  // FPS + automatic quality drop for slow Chromebooks
+  // FPS meter + adaptive quality: steps down when slow, back up when it recovers
   fpsFrames++; fpsTime += dt;
   if (fpsTime >= 1) {
     fpsVal = fpsFrames / fpsTime; fpsFrames = 0; fpsTime = 0;
-    setText('fps', fpsVal.toFixed(0) + ' FPS');
-    if (!fps15 && isActive() && !paused && fpsVal < 27) { if (++lowFpsWindows >= 2 && renderScale > 0.55) { renderScale -= 0.15; applyRes(); lowFpsWindows = 0; } } else lowFpsWindows = 0;
+    setText('fps', fpsVal.toFixed(0) + ' FPS' + (renderScale < 1 ? ` · ${Math.round(renderScale * 100)}%` : ''));
+    if (!fps15 && isActive() && !paused) {
+      const sinceChange = (now - lastScaleChange) / 1000;
+      if (fpsVal < 27) { highFpsWindows = 0; if (++lowFpsWindows >= 2 && renderScale > 0.55) { renderScale = Math.max(0.55, renderScale - 0.15); applyRes(); lowFpsWindows = 0; lastScaleChange = now; } }
+      else if (fpsVal > 50) { lowFpsWindows = 0; if (++highFpsWindows >= 3 && renderScale < 1 && sinceChange > 5) { renderScale = Math.min(1, renderScale + 0.15); applyRes(); highFpsWindows = 0; lastScaleChange = now; } }
+      else { lowFpsWindows = 0; highFpsWindows = 0; }
+    }
   }
 }
 $('loading').classList.add('hidden');
 requestAnimationFrame(frame);
 
-// small hook for automated testing / Vesper's audit
+// hook for automated tests / Vesper's audit
 window.BBB = { get state() { return state; }, get paused() { return paused; }, player, get bots() { return bots; }, get blockCount() { return blockCount; },
-  startMatch, runTest, respawnNow, computeField, fieldNext, fieldBreak, cellAt, stacks, get fps() { return fpsVal; }, get transitions() { return transitionsLog.slice(); },
-  placeBlock, cellTop, get ghost() { return ghost; }, set matchT(v) { matchT = v; }, get navRecomputes() { return navRecomputes; } };
+  startMatch, runTest, respawnNow, cellAt, cellTop, stacks, placeBlock, floorConnected, get fps() { return fpsVal; }, get renderScale() { return renderScale; },
+  get transitions() { return transitionsLog.slice(); }, get ghost() { return ghost; }, set matchT(v) { matchT = v; }, get matchT() { return matchT; },
+  get overtime() { return overtime; }, get otT() { return otT; }, set otT(v) { otT = v; }, get navRecomputes() { return navRecomputes; }, get landmarks() { return landmarks; },
+  bonkBot, damageChar, get endTitle() { return $('endTitle').textContent; }, water, perm, N, DIVIDER_I };
 </script>
 </body>
 </html>
