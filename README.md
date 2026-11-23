@@ -1,6 +1,6 @@
 # Backrooms Build Brawl
 
-A 3D arena game based on the drawings and story of **August Spangler**. **Version 3 — Bonk Voyage** (audited Nov 23, 2026): a third mode joins Capture the Flag and Bonk Brawl — 6v6 pirate ship battles with round/chain/grape shot, a treasure island, and an EXIT sign for a prize.
+A 3D arena game based on the drawings and story of **August Spangler**. **Version 4 — Bonk Voyage** (audited Nov 23, 2026): rebuilt ships with real hulls, gun-port cannons and a big sail that drops when the mast breaks; the naval match is now 4:00 of team deathmatch (bonks 1 pt, sinks 5 pts), then a 2:30 treasure race for the EXIT chest.
 
 **Art & Story by August Spangler • Directed by August & Corey Spangler • Built by AI**
 
