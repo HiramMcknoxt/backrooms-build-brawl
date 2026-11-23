@@ -1,48 +1,38 @@
 # Backrooms Build Brawl
 
-A 3D arena game based on the drawings and story of **August Spangler**. **Version 4 — Bonk Voyage** (audited Nov 23, 2026): rebuilt ships with real hulls, gun-port cannons and a big sail that drops when the mast breaks; the naval match is now 4:00 of team deathmatch (bonks 1 pt, sinks 5 pts), then a 2:30 treasure race for the EXIT chest.
+A 3D arena game based on the drawings and story of **August Spangler**.
 
-**Art & Story by August Spangler • Directed by August & Corey Spangler • Built by AI**
+**Invented & Directed by August Spangler • Built by AI**
 
 ## The idea
 
 Shoot, build, and bonk in the Backrooms. Captain Clark battles the Balloon Smiler
 and friends — and when you get bonked, you don't just wait to respawn. You get
-**60 seconds as a ghost to build defenses** around the spot where you fell
-(**Bonk-to-Build**), then you respawn and fight from your own fort.
+**60 seconds as a ghost to build defenses** (**Bonk-to-Build**), then you respawn
+and fight from your own fort.
 
-## This build
+## Modes
 
-The full game (the navigation prototype passed its gate and the director's playtest):
+- **Capture the Flag** — 3v3, first to 3 captures or most at 5:00. Carriers are
+  10% slower, dropped flags auto-return in 20 s, ties go to overtime.
+- **Bonk Brawl** — free-for-all bonking on the same Yellow Rooms / Water Rooms arena.
+- **Bonk Voyage** — 6v6 pirate ship battles. Sloops (3 guns a side, fast) and
+  Galleons (5 guns a side, respawn hub) with round, chain, and grape shot;
+  chain shot drops masts and sails. Four minutes of sea battle (bonks 1 pt,
+  sinks 5 pts), then both island doors open for a 2:30 treasure race to the
+  EXIT chest — guarded by the two Partygoer Keepers.
 
-- Three bot rivals — Balloon Smiler (rusher), Crab Boss (strafing tank), Hazmat Explorer
-  (cover-user and flanker) — fighting you *and each other*, with a live scoreboard
-- Bots play the whole game: when bonked, each bot does its own Bonk-to-Build and
-  raises a small fort before respawning
-- Grid pathfinding that updates live when blocks change; bots reroute around new
-  walls and bonk through destructible blocks when trapped
-- 5-minute matches; ties go to Sudden Bonk overtime (first bonk wins, 30 quiet
-  seconds is a draw)
-- Two-zone arena: Yellow Rooms + flooded Water Rooms, landmarks, minimap, pre-built cover
-- Bonk-to-Build ghost mode: 60-second build window, RESPAWN NOW button, safe-respawn check
-- Swept projectile collision, instanced block rendering — built to hold 30+ FPS on a Chromebook
-- Test Lab (press `P` in a match) with one-button versions of the design review tests
-- Debug overlay (backquote key) showing bot paths
-- Keyboard/trackpad controls and gamepad support
+Plus the Funny Arsenal (Hat Launcher, Pool Noodle, Foam Dart Blaster, Silly
+String Can, Marshmallow Blaster, and The Morning Spray Bottle — useless
+against the Water Rooms Skeleton: no hair, no problem), Bonk-to-Build ghost
+mode with two build anchors, keyboard/mouse, touch, and gamepad controls,
+and an original synthesized soundtrack.
 
-Play it: open `index.html` in a browser (internet needed once for the Three.js CDN).
+## Current build
 
-## Council process
-
-Designed by an AI council, in the open:
-1. **Gemini** — design completeness pass (what the spec forgot)
-2. **ChatGPT** — hostile review (top failure modes, the kill question, mandatory rules)
-3. **Claude** — build, with the other two passes folded in as amendments
-
-Full council record is in the "Backrooms Build Brawl — Council" Google Drive folder.
-
-## Not yet tested
-
-- A real low-end Chromebook (the performance gate)
-- Real pointer lock with a human clicking
-- A plugged-in Xbox controller
+**Gemini Attempt — Full Project** (audited Nov 23, 2026): a complete
+from-scratch build of the whole game by the Gemini build seat — all three
+modes, August's full character roster, and the Bonk Voyage spec. Muse's
+audit passed it with one fix (Treasure-phase ship sinks no longer pay
+Battle-phase points). Earlier builds (the ChatGPT-line v1–v4) live in the
+project's council folder with their audit notes.
