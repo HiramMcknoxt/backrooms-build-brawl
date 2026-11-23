@@ -124,6 +124,13 @@ body.touch-playing .pop{font-size:clamp(18px,5vw,35px)}
   body.touch-playing #msg{bottom:8px;width:42vw}
   body.touch-playing #ghostUI{top:65px}
 }
+#navHud{font:700 12px system-ui;width:min(80vw,350px);white-space:pre-line} #navHint{color:#ffe178}
+body.voyage #board{max-height:34vh;overflow:hidden}
+body.voyage.touch-playing #hudTR{display:none}
+body.voyage.touch-playing #ghostUI{top:125px}
+body.voyage.touch-playing #touchActions{grid-template-columns:repeat(3,minmax(51px,auto))}
+#touchAction[hidden],#navHud[hidden]{display:none!important}
+body.voyage #end .card{background:#fff8d6e8;max-height:84dvh}
 </style>
 </head>
 <body>
@@ -137,6 +144,7 @@ body.touch-playing .pop{font-size:clamp(18px,5vw,35px)}
 </div>
 <div id="hudTop" class="hud hidden">
   <div id="timer" class="chip">5:00</div><div id="ctfPanel" class="chip"><div id="ctfScore"></div><div id="flagStatuses"></div></div>
+  <div id="navHud" class="chip" hidden><div id="navFleet"></div><div id="navHint"></div></div>
   <div id="otBanner" class="chip hidden">⚡ SUDDEN BONK — first bonk wins!</div>
   <div id="feed"></div>
 </div>
@@ -183,6 +191,7 @@ body.touch-playing .pop{font-size:clamp(18px,5vw,35px)}
     <button id="touchSprint" type="button" aria-pressed="false">Sprint</button>
     <button id="touchJump" type="button">Jump</button>
     <button id="touchPrimary" type="button">Fire</button>
+    <button id="touchAction" type="button" hidden>Action</button>
     <button id="touchRespawn" class="hidden" type="button">Respawn</button>
   </div>
 </div>
@@ -199,9 +208,9 @@ body.touch-playing .pop{font-size:clamp(18px,5vw,35px)}
 <path fill="#865230" d="m24 39 15-19 5 6 6-6 12 19zm84 0 15-19 5 6 6-6 12 19z"/>
 <path fill="#f4e3b8" d="M37 42h4v3h-4zm8 0h4v3h-4zm76 0h4v3h-4zm8 0h4v3h-4z"/>
 </svg><h1>BACKROOMS<br>BUILD BRAWL</h1>
-    <div class="credit">Invented &amp; Directed by August Spangler</div><div class="credit">Version 2 — Capture the Flag • Built by AI (ChatGPT build seat)</div>
+    <div class="credit">Invented &amp; Directed by August Spangler</div><div class="credit">Version 3 — Bonk Voyage • Built by AI (ChatGPT build seat)</div>
     <div class="tag">1 Player vs Bots — Multiplayer coming later.</div>
-    <label>Game mode <select id="v2Mode"><option value="ctf">Capture the Flag</option><option value="brawl">Bonk Brawl (Free-for-All)</option></select></label>
+    <label>Game mode <select id="v2Mode"><option value="ctf">Capture the Flag</option><option value="brawl">Bonk Brawl (Free-for-All)</option><option value="voyage">Bonk Voyage</option></select></label>
     <div id="v2Roster" role="group" aria-label="Choose your character"></div>
     <div class="row"><label>Clark skin <select id="v2Skin"></select></label><label>Weapon <select id="v2Weapon"></select></label><label>Meme mode <select id="memeMode"><option value="1">On</option><option value="0">Off</option></select></label><label>Music <select id="musicMode"><option value="1">On</option><option value="0">Off</option></select></label><button id="muteQuick" class="btn sm">Mute</button></div>
     <p id="v2Tip"></p>
@@ -226,6 +235,7 @@ body.touch-playing .pop{font-size:clamp(18px,5vw,35px)}
         <p><b>Ghost:</b> <kbd>Space</kbd> float up · <kbd>C</kbd> float down · <kbd>Z</kbd>/<kbd>V</kbd> choose anchor in CTF</p>
         <p><kbd>P</kbd>/<kbd>Esc</kbd> pause · <kbd>M</kbd> mute · <kbd>`</kbd> debug</p>
         <p><b>Controller:</b> L-stick move · R-stick look · RT throw/place · LT remove · A jump · Y build · LB/RB block · D-pad ←/→ weapon or ghost anchor · X respawn now · Start pause</p>
+        <p><b>Bonk Voyage:</b> E / right click / pad B / touch Action to board or use stations. Hold it to repair or open the chest. Helm: movement controls. Cannon: aim and fire as usual, 1–3 or D-pad / Ammo to switch. Use arrow keys for keyboard-only look.</p>
         <p><b>Phone:</b> Use the left stick to move and drag the right side to look. Tap Weapon or Block to cycle. Hold Fire or Place to repeat. Landscape gives you more room.</p>
       </div>
       <div class="panel"><h3>Settings</h3>
@@ -269,6 +279,7 @@ body.touch-playing .pop{font-size:clamp(18px,5vw,35px)}
         <button class="btn sm" data-test="bonk">6 · Bonk me now</button>
         <button class="btn sm" data-test="tie">7 · Force a tie → Sudden Bonk</button>
         <button class="btn sm" data-test="botfort">8 · Bonk nearest bot (watch its fort)</button>
+        <button class="btn sm" data-test="navalStress">Naval stress · 12 bots / 4 ships / 32 cannons</button>
         <button class="btn sm" data-test="debug">Debug overlay (toggle)</button>
       </div>
       <p class="small">1: walls off a bot's route to you — it reroutes or bonks through. 2: seals your fall spot — respawn must still be safe. 3: watch FPS (goal 30+). 4: at 15 FPS nothing should pass through walls. 5: die near the end — the match must end cleanly. 7: ties every score and ends the clock. 8: bonks the closest bot — it builds a real fort for 60s, then respawns inside it.</p>
@@ -1064,6 +1075,7 @@ function zoneOf(who) { return who === player ? (state === S.GHOST ? ghost.fallCe
 // THE placement rule — used by the player AND by bots. '' = OK, otherwise the reason.
 function placementCheck(c, type, base, who) {
   if (c < 0) return 'NO SPOT';
+  if(naval.on && (!island({x:cx(c)}) || Math.hypot(cx(c)-45,cz(c)-27)<3)) return 'BUILD ON THE ISLAND, CLEAR OF THE CHEST';
   const i = c % N, j = (c / N) | 0;
   if (i <= 0 || j <= 0 || i >= N - 1 || j >= N - 1) return 'ARENA EDGE';
   if (perm[c]) return "CAN'T BUILD IN A WALL";
@@ -1096,6 +1108,7 @@ function collide(x, z, y, h, half) {
   }
 }
 function moveChar(c, dt, vx, vz) {
+  if(naval.on && !island(c)){navalMove(c,dt,vx,vz);return;}
   c.vy -= GRAV * dt; if (c.vy < -30) c.vy = -30;
   c.hitWall = false;
   const nx = c.x + vx * dt; collide(nx, c.z, c.y, c.h, c.half); if (!colBlocked) c.x = nx; else c.hitWall = true;
@@ -1462,6 +1475,7 @@ function bonkBot(b, src) {
   burst(b.x, b.y + 1, b.z, 0xffe14a, 18, 5, 5, 1); burst(b.x, b.y + 1, b.z, b.t.color, 10, 4, 4, 1);
   if (src === player) { sfx('botBonk'); popup('+1 BONK!'); memeBurst('bonk', .24); } else sfx('farBonk');
   feed(src ? `${src.emoji} ${src.name} bonked ${b.emoji} ${b.name}` : `${b.emoji} ${b.name} got bonked`);
+  if(naval.on && navalBonk(b,src)) return;
   if (overtimeBonk(src)) return;
   if (src && src !== b) src.score++;
   botEnterGhost(b);
@@ -1638,8 +1652,8 @@ function updateBot(b, dt) {
 }
 function updateBotVisual(b, t) {
   const g = b.group;
-  g.getObjectByName('wetHair').visible=b.wetT>0 && b.alive;
-  g.getObjectByName('strings').visible=b.stringT>0 && b.alive;
+  const wetHair=g.getObjectByName('wetHair'); if(wetHair) wetHair.visible=b.wetT>0 && b.alive;
+  const strings=g.getObjectByName('strings'); if(strings) strings.visible=b.stringT>0 && b.alive;
   g.rotation.z=b.spinT>0 ? b.spinT*10 : 0;
   if (b.ghost) {
     g.visible = true;
@@ -1662,7 +1676,8 @@ function damageChar(ch, amount, src) {
   if (ch === player) { damagePlayer(amount, src); return; }
   if (!ch.alive) return;
   if (ch.invuln > 0) { sfx('sparkle'); return; }
-  if (src && src !== player && !ctf && playerHelpless()) { sfx('sparkle'); return; } // bot-vs-bot scoring paused while the player builds
+  if (src && src !== player && !ctf && !naval.on && playerHelpless()) { sfx('sparkle'); return; } // bot-vs-bot scoring paused while the player builds
+  if(naval.on) { ch.openT=0; ch.hitCd=.25; }
   ch.hp -= amount; ch.flash = 0.15;
   if (src === player || Math.hypot(ch.x - camera.position.x, ch.z - camera.position.z) < 14) sfx('boink');
   if (ch.hp <= 0) bonkBot(ch, src);
@@ -1687,6 +1702,7 @@ function camDir(out) { const cp = Math.cos(player.pitch); return out.set(-Math.s
 const camD = new THREE.Vector3();
 function eye() { return state === S.GHOST ? tmpV.set(ghost.x, ghost.y, ghost.z) : tmpV.set(player.x, player.y + playerEye(), player.z); }
 function playerFire() {
+  if(naval.on && naval.station){if(naval.station.gun) playerCannon();return;}
   if (player.fireCd > 0 || state !== S.PLAYING) return;
   const w=weapons[player.weapon];
   camDir(camD);
@@ -1710,6 +1726,7 @@ function bonkPlayer(src) {
   if(player.t.key==='lv4') catCall();
   player.bonked++; player.hp = 0; sfx('bonked');
   feed(src ? `${src.emoji} ${src.name} bonked ${player.emoji} You` : `${player.emoji} You got bonked`);
+  if(naval.on && navalBonk(player,src)) return;
   if (overtimeBonk(src)) return;
   if (src && src !== player) src.score++;
   popup('BONKED!');
@@ -1828,6 +1845,7 @@ function endMatch(res) {
   $('endBoard').innerHTML = rows.map(p => `<tr class="${p === w ? 'win' : ''}"><td>${p.emoji} ${p.name}</td><td>${p.score} bonk${p.score === 1 ? '' : 's'}</td><td>bonked ${p === player ? player.bonked : p.deaths}×</td><td>${p === player ? player.built : p.totalBuilt} blocks built</td></tr>`).join('');
   $('endStats').innerHTML = `<span class="small">Blocks on the map at the end: ${blockCount}/${MAX_WORLD_BLOCKS}</span>`;
   $('end').classList.remove('hidden'); setHud(false);
+  if(naval.on) navalResults(res);
   if (w === player) sfx('fanfare');
 }
 
@@ -1847,6 +1865,8 @@ function clearWorld() {
   for(const d of decals) d.life=0;
 }
 function resetMatch() {
+  if(naval.on) return navalSetup();
+  navalClear();
   clearWorld();
   genMaze((Math.random() * 1e9) | 0);
   placeLandmarks();
@@ -1880,18 +1900,20 @@ function resetMatch() {
   $('feed').innerHTML = '';
 }
 function startMatch(mode) {
-  initAudio(); inputMode = mode; ctf=$('v2Mode').value==='ctf';
+  initAudio(); inputMode = mode; ctf=$('v2Mode').value==='ctf'; naval.on=$('v2Mode').value==='voyage';
   ['title', 'end', 'pause', 'pauseNote'].forEach(id => $(id).classList.add('hidden'));
   state = S.TITLE;
   chooseAnchorWithMouse=false;
   clearTouchInput(); resetMatch(); paused = false; setHud(true); syncTouchControls();
   if (mode === 'mouse') lockPointer();
+  if(naval.on) return showMsg('Board a ship, sink a rival, find the EXIT!',4);
   showMsg(ctf?'GO! Bring their flag back to your Water Rooms base.':'GO! Most bonks wins!',3);
 }
 function quitToTitle() {
   if (state !== S.TITLE) { if (state !== S.ENDED) setState(S.TITLE); else state = S.TITLE; }
   paused = false; if (document.pointerLockElement) document.exitPointerLock();
   ['pause', 'end', 'ghostUI', 'ghostTint', 'btnRespawn', 'pauseNote'].forEach(id => $(id).classList.add('hidden'));
+  if(naval.on){clearWorld();navalClear();genMaze(12345);placeLandmarks();buildMazeMeshes();}
   $('title').classList.remove('hidden'); setHud(false); flagRoot.visible=false; $('hairDrops').classList.add('hidden');
   flagGroup.visible = fallen.visible = zoneLine.visible = preview.visible = remBox.visible = false;
   clearTouchInput(); syncTouchControls();
@@ -1912,6 +1934,7 @@ document.addEventListener('pointerlockchange', () => {
 });
 function pauseGame(why) {
   if (!isActive()) return;
+  naval.mouse=false; naval.channel=null; naval.held=false;
   paused = true; primaryHeld = false; keys.clear();
   clearTouchInput(); syncTouchControls();
   $('pauseWhy').textContent = why || ''; $('pause').classList.remove('hidden');
@@ -1934,10 +1957,11 @@ canvas.addEventListener('mousedown', e => {
     chooseAnchorWithMouse=false;
     lockPointer(); return;
   }
+  if(naval.on && e.button===2 && !buildMode && state===S.PLAYING){naval.mouse=true;navalAction();return;}
   if (e.button === 0) { primaryHeld = true; primaryPress(); }
   else if (e.button === 2) secondaryPress();
 });
-addEventListener('mouseup', e => { if (e.button === 0) primaryHeld = false; });
+addEventListener('mouseup', e => { if (e.button === 0) primaryHeld = false; if(e.button===2) naval.mouse=false; });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 canvas.addEventListener('wheel', e => { if (isActive() && !paused) { swingOrBuild(e.deltaY > 0 ? 1 : -1); e.preventDefault(); } }, { passive: false });
 const GAME_KEYS = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Backquote', 'Tab']);
@@ -1949,10 +1973,11 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyP' || e.code === 'Escape') { if (paused) resumeGame(false); else pauseGame('Paused.'); return; }
   if (paused) return;
   if (!e.repeat) {
-    if (e.code === 'KeyB' && state === S.PLAYING) toggleBuild();
+    if (e.code === 'KeyB' && state === S.PLAYING && (!naval.on || island(player))) toggleBuild();
     if (/^Digit[1-6]$/.test(e.code)) {
       const i=+e.code.slice(-1)-1;
       if(state===S.GHOST||buildMode) { if(i<BUILD_KEYS.length) setType(BUILD_KEYS[i]); }
+      else if(naval.on && naval.station?.gun) naval.station.gun.ammo=i%3;
       else selectWeapon(i);
     }
     if(state===S.GHOST && ctf && (e.code==='KeyZ'||e.code==='KeyV')) selectGhostAnchor(e.code==='KeyV');
@@ -1960,6 +1985,7 @@ addEventListener('keydown', e => {
     if (e.code === 'KeyF' || e.code === 'KeyG') { primaryHeld = true; primaryPress(); }
     if (e.code === 'KeyR' || e.code === 'KeyX') secondaryPress();
   }
+  if(naval.on && e.code==='KeyE' && !e.repeat) navalAction();
   keys.add(e.code);
 });
 addEventListener('keyup', e => { keys.delete(e.code); if (e.code === 'KeyF' || e.code === 'KeyG') primaryHeld = false; if (GAME_KEYS.has(e.code) && state !== S.TITLE) e.preventDefault(); });
@@ -2044,7 +2070,8 @@ function pollPad() {
   if (paused) { if (pressed(9) || pressed(0)) { inputMode = 'pad'; paused = false; $('pause').classList.add('hidden'); } return; }
   if (inputMode !== 'pad' && document.pointerLockElement !== canvas) inputMode = 'pad';
   if (pressed(9)) { pauseGame('Paused.'); return; }
-  if (pressed(3) && state === S.PLAYING) toggleBuild();
+  if(naval.on && pressed(1)) navalAction();
+  if (pressed(3) && state === S.PLAYING && (!naval.on || island(player))) toggleBuild();
   if (pressed(4)) cycleType(-1); if (pressed(5)) cycleType(1);
   if(pressed(14)||pressed(15)) { if(ctf&&state===S.GHOST) selectGhostAnchor(pressed(15)); else swingOrBuild(pressed(15)?1:-1); }
   if (pressed(2)) respawnNow();
@@ -2091,6 +2118,7 @@ let fpsFrames = 0, fpsTime = 0, fpsVal = 60, lowFpsWindows = 0, highFpsWindows =
 function updateHUD(dt) {
   const full=Math.ceil(player.hp);
   setText('hearts',state===S.GHOST?'👻👻👻':'❤️'.repeat(full)+'🖤'.repeat(player.t.hp-full)+(player.hp%1?' '+player.hp.toFixed(2):''));
+  if(naval.on) navalHUD(dt);
   $('ctfPanel').classList.toggle('hidden',!ctf);
   if(ctf) {
     setText('ctfScore','💧 '+captures[0]+' – '+captures[1]+' ☀️');
@@ -2108,6 +2136,7 @@ function updateHUD(dt) {
   setText('pocketTxt', state === S.GHOST ? 'GHOST BLOCKS ' + ghost.left + '/' + ghostBudget(player) : 'POCKET ' + player.pocket + '/' + POCKET_MAX);
   for (let t = 0; t < TYPE_H.length; t++) $('slot' + t).classList.toggle('sel', selType === t);
   setText('modeLbl', state === S.GHOST ? 'GHOST BUILD' : buildMode ? 'BUILD (B)' : weapons[player.weapon].icon+' '+weapons[player.weapon].name+(player.weapon===3?' · '+Math.round(player.pressure*100)+'%':'')+' · 1–6');
+  if(naval.on && naval.station?.gun) setText('modeLbl',N_AMMO[naval.station.gun.ammo]);
   $('cross').classList.toggle('build', state === S.GHOST || buildMode);
   if (state === S.GHOST) {
     setText('gCount', String(Math.max(0, Math.ceil(ghost.t))));
@@ -2210,6 +2239,7 @@ function updateGhost(dt) {
   ghost.y = Math.max(0.8, Math.min(CEIL - 0.25, ghost.y));
 }
 function fixedUpdate(dt) {
+  if(naval.on){navalStep(dt);return;}
   navBudget = 2;
   if (state === S.PLAYING) updatePlayer(dt);
   else if (state === S.GHOST) updateGhost(dt);
@@ -2223,9 +2253,11 @@ function frameUpdate(dt, wdt) {
   gameTime += dt;
   musicTick(dt);
   if (slowmoT > 0) { slowmoT -= dt; if (slowmoT <= 0) timeScale = 1; }
-  if (!overtime) { matchT -= dt; if (matchT <= 0) { matchT = 0; onTimeUp(); if (state === S.ENDED) return; } }
+  if(naval.on) navalClock(dt);
+  else if (!overtime) { matchT -= dt; if (matchT <= 0) { matchT = 0; onTimeUp(); if (state === S.ENDED) return; } }
   else if(overtimeKind!=='capture') { otT -= dt; if (otT <= 0) { endMatch({ draw: true, reason: '30 seconds of Sudden Bonk with no knockout.' }); return; } }
-  const turn = ((keys.has('KeyQ') || keys.has('ArrowLeft')) ? 1 : 0) - ((keys.has('KeyE') || keys.has('ArrowRight')) ? 1 : 0);
+  if(state===S.ENDED) return;
+  const turn = ((keys.has('KeyQ') || keys.has('ArrowLeft')) ? 1 : 0) - (((!naval.on && keys.has('KeyE')) || keys.has('ArrowRight')) ? 1 : 0);
   const tilt = (keys.has('ArrowUp') ? 1 : 0) - (keys.has('ArrowDown') ? 1 : 0);
   player.yaw += (turn * 2.4 - pad.rx * 3.0) * settings.sens * dt;
   player.pitch = Math.max(-1.45, Math.min(1.45, player.pitch + (tilt * 1.8 - pad.ry * 2.2) * settings.sens * dt));
@@ -2343,6 +2375,7 @@ function testBotFort() {
   showMsg(`TEST 8: bonked ${b.name}. Watch it build a fort (it places a block every ~4s), then respawn inside after 60s. Check the scoreboard.`, 5);
 }
 function runTest(name) {
+  if(name==="navalStress"){navalStress();return;}
   if (name === 'debug') { setDebug(!settings.debug); return; }
   if (!isActive()) return;
   if (name === 'fps15') { fps15 = !fps15; showMsg(fps15 ? 'TEST 4: forced to 15 FPS — try to clip through walls with hats or sprinting.' : '15 FPS test off', 4); }
@@ -2616,8 +2649,8 @@ function drawDecals(dt) {
   for (const kind of [2,4]) { const m=impactMeshes[kind]; m.count=counts[kind]; m.instanceMatrix.needsUpdate=true; }
 }
 function activeActor(a) { if(!a) return false; return a === player ? state === S.PLAYING : a.alive; }
-function enemies(a,b) { return a !== b && (!ctf || a.team !== b.team); }
-function mayHit(a,b) { return activeActor(b) && enemies(a,b) && (ctf || a === player || !playerHelpless()); }
+function enemies(a,b) { return a !== b && (!(ctf || naval.on) || a.team !== b.team); }
+function mayHit(a,b) { return activeActor(b) && enemies(a,b) && (naval.on || ctf || a === player || !playerHelpless()); }
 function arsenalSound(kind) {
   switch(kind) {
     case 0: sfx('thwip'); break;
@@ -2679,6 +2712,7 @@ function selectWeapon(i) {
   sfx('tick');
 }
 function swingOrBuild(d) {
+  if(naval.on && naval.station?.gun){const g=naval.station.gun;g.ammo=(g.ammo+d+3)%3;return;}
   if(state===S.GHOST || buildMode) cycleType(d);
   else selectWeapon(player.weapon+d);
 }
@@ -2774,6 +2808,7 @@ $('v2Mode').onchange();
 // Touch input shares the regular movement, combat and building entry points.
 const touch = { x: 0, y: 0, sprint: false, jumpQueued: false, held: new Map(), pointers: new Map() };
 function clearTouchInput() {
+  naval.touch=false;
   touch.x = touch.y = 0;
   touch.sprint = touch.jumpQueued = false;
   touch.held.clear();
@@ -2789,7 +2824,8 @@ function syncTouchControls() {
   const active = touchActive(), ghostMode = state === S.GHOST;
   const building = ghostMode || buildMode;
   const selection = active ? (building ? TYPE_NAME[selType] : weapons[player.weapon].name) : '';
-  const layout = [inputMode,active,ghostMode,building,selection,touch.sprint].join('|');
+  const gun=naval.on && active && naval.station?.gun;
+  const layout = [inputMode,active,ghostMode,building,selection,touch.sprint,naval.on,gun?.ammo,naval.on && island(player)].join('|');
   if (layout === lastTouchLayout) return;
   lastTouchLayout = layout;
   document.body.classList.toggle('touch-playing', inputMode === 'touch' && isActive());
@@ -2804,6 +2840,9 @@ function syncTouchControls() {
   $('touchMode').textContent = building ? 'Fight' : 'Build';
   $('touchJump').textContent = ghostMode ? 'Up' : 'Jump';
   $('touchPrimary').textContent = building ? 'Place' : 'Fire';
+  $('touchAction').hidden=!(naval.on && active && !ghostMode);
+  if(naval.on && !island(player)) $('touchMode').classList.add('hidden');
+  if(gun){$('touchNext').textContent='Ammo';$('touchSelection').textContent=N_AMMO[gun.ammo];}
   $('touchSprint').setAttribute('aria-pressed', String(touch.sprint));
 }
 function bindTouchPointer(id, start, move, finish) {
@@ -2858,6 +2897,601 @@ for (const [id, action] of [
   ['touchRespawn', respawnNow]
 ]) onClick(id, () => { if (touchActive()) { action(); syncTouchControls(); } });
 addEventListener('resize', clearTouchInput);
+// Bonk Voyage: shared arena grid, actors, weapons, and island construction.
+const N_AMMO=['Round Shot','Chain Shot','Grape Shot'];
+const naval={on:false,root:new THREE.Group(),ships:[],balls:[],doors:[]};
+const chest={x:45,z:27};
+const island=a=>a.x>=40;
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const turnDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
+const shipUp=s=>s.hp>0;
+const gateOpen=a=>a.team===2||naval.time>=naval.unlock[a.team];
+const navMats=new Map();
+scene.add(naval.root);
+function navMat(c) {
+  if(!navMats.has(c)) navMats.set(c,new THREE.MeshLambertMaterial({color:c}));
+  return navMats.get(c);
+}
+function navBox(g,c,w,h,d,x,y,z) {
+  return addMesh(g,new THREE.BoxGeometry(w,h,d),navMat(c),x,y,z);
+}
+function navSign(g,label,w,h,x,y,z) {
+  const canvas=document.createElement('canvas'); canvas.width=256;canvas.height=80;
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#233a2d';ctx.fillRect(0,0,256,80);
+  ctx.fillStyle='#baff83';ctx.font='bold 36px sans-serif';ctx.textAlign='center';
+  ctx.fillText(label,128,54);
+  const m=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(canvas),side:THREE.DoubleSide});
+  return addMesh(g,new THREE.PlaneGeometry(w,h),m,x,y,z);
+}
+function navalClear() {
+  naval.root.traverse(o=>{
+    o.geometry?.dispose();
+    if(o.material?.map){o.material.map.dispose();o.material.dispose();}
+  });
+  naval.root.clear();for(const m of navMats.values())m.dispose();navMats.clear();
+  Object.assign(naval,{ships:[],balls:[],doors:[],station:null,channel:null,mouse:false,touch:false,
+    held:false,stress:false,result:null,hud:0});
+  $('navHud').hidden=true; document.body.classList.remove('voyage');ceil.visible=true;
+}
+function navalMap() {
+  perm.fill(0);water.fill(0);clearLandmarks();
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){
+    const c=j*N+i;
+    perm[c]=Number(i===0||j===0||i===24||j===24||
+      (i===19&&(j<11||j>15))||(i>=20&&(j<8||j>19)));
+    water[c]=Number(!perm[c]&&i<19&&j>2&&j<22&&
+      !((i===6||i===7)&&j===11)&&!((i===14||i===15)&&j===15));
+  }
+  buildMazeMeshes();buildMinimapBase();lightIM.count=0;ceil.visible=false;
+  for(const [x,z] of [[14,23],[30,31]])navBox(naval.root,0x8ecacb,4,.24,2,x,.04,z);
+  for(let x=6;x<=36;x+=10)for(const z of [16,34])navBox(naval.root,0xffefb2,2,.17,.35,x,3.55,z);
+  for(const z of [10,39]){
+    navBox(naval.root,0x6b929a,1,3,1,2.7,1.45,z);
+    navBox(naval.root,0x81ccef,.2,2.5,.8,3.3,1.3,z);
+  }
+  for(const t of [0,1]){
+    const c=t?0xf6a24b:0x56bedc;
+    navBox(naval.root,c,15,.16,4,19,.01,t?46:4);
+    naval.doors.push(navBox(naval.root,c,.24,3.2,5,39,1.6,t?29.5:24.5));
+  }
+  navSign(naval.root,'ISLAND DOOR',3,.5,38.8,3.6,27).rotation.y=-Math.PI/2;
+  placeBlock(cellAt(chest.x,chest.z),3,0,'chest',true,true);
+  navBox(naval.root,0xc6b06b,1.97,.62,1.97,chest.x,.31,chest.z);
+  navBox(naval.root,0x754327,1,.46,.7,chest.x,.85,chest.z);
+  naval.lid=navBox(naval.root,0xb38044,1.04,.16,.74,chest.x,1.14,chest.z);
+  naval.exit=navSign(naval.root,'EXIT',.95,.32,chest.x,1.26,chest.z+.13);
+  naval.exit.visible=false;
+}
+function makeShip(team,big) {
+  const s={team,big,x:big?15:24,z:team?40:10,yaw:team?Math.PI:0,
+    name:big?'Galleon':'Sloop',w:big?2:1.5,l:big?3.65:2.7,cap:big?160:105,
+    mastCap:big?90:62,sails:0,speed:0,reload:big?6:4,turn:big?.58:.88,
+    top:big?2.6:3.8,sink:0,ram:0,guns:[],root:new THREE.Group()};
+  s.hp=s.cap;s.mast=s.mastCap;s.wheel={x:0,z:-s.l+.55};
+  const g=s.root,paint=team?0xf4a147:0x5cbce7,wood=team?0xa45934:0x426a80;
+  naval.root.add(g);g.position.set(s.x,0,s.z);g.rotation.y=s.yaw;
+  navBox(g,wood,2*s.w,.86,2*s.l,0,.51,0);
+  navBox(g,0xb68859,2*s.w,.12,2*s.l,0,.97,0);
+  navBox(g,wood,1.45*s.w,.65,.65,0,.6,s.l+.12);
+  navBox(g,paint,2.04*s.w,.14,2.02*s.l,0,.75,0);
+  navBox(g,0x674732,.15,.59,.14,0,1.31,s.wheel.z);
+  addMesh(g,new THREE.TorusGeometry(.27,.05,5,12),navMat(0xffcc72),0,1.60,s.wheel.z);
+  s.rig=new THREE.Group();s.rig.position.y=1;g.add(s.rig);
+  navBox(s.rig,0x735133,.14,2.6,.14,0,1.3,0);
+  navBox(s.rig,paint,s.w*1.48,1.05,.08,0,1.85,.12);
+  s.hole=navBox(g,0x322524,.63,.3,.05,0,.9,s.l+.48);s.hole.visible=false;
+  for(const side of [-1,1]){
+    const n=big?5:3;
+    for(let i=0;i<n;i++){
+      const gun={x:side*(s.w-.29),z:(i-(n-1)/2)*1.08,side,ammo:0,cd:Math.random()*s.reload};
+      s.guns.push(gun);navBox(g,0x40404c,.64,.24,.29,gun.x+side*.17,1.25,gun.z);
+    }
+    for(let i=0;i<4;i++)navBox(g,0xf8d596,.14,.07,.57,side*(s.w+.07),.18+i*.25,0);
+  }
+  return s;
+}
+function shipWorld(s,x,z){
+  const c=Math.cos(s.yaw),n=Math.sin(s.yaw);
+  return {x:s.x+x*c+z*n,z:s.z-x*n+z*c};
+}
+function shipLocal(s,a){
+  const x=a.x-s.x,z=a.z-s.z,c=Math.cos(s.yaw),n=Math.sin(s.yaw);
+  return {x:x*c-z*n,z:x*n+z*c};
+}
+function boardShip(a,s,x,z){
+  Object.assign(a,{ship:s,deckX:x,deckZ:z,vy:0,grounded:true,y:1.03-s.sink*.17},shipWorld(s,x,z));
+}
+function atDock(a,i){
+  Object.assign(a,{ship:null,x:13+i%6*2.15,z:a.team?45.5:4.5,y:0,vy:0,
+    grounded:true,yaw:a.team?0:Math.PI});
+}
+function navalBot(i,t,keeper=false){
+  const b=createBot(i%5);
+  b.team=t;b.slot=i;b.keeper=keeper;b.alive=true;b.invuln=1;
+  if(keeper||i===11){
+    disposeModel(b.group);scene.remove(b.group);
+    if(keeper){
+      b.t=BOT_TYPES.hazmat;b.group=makeBotMesh('hazmat');
+      b.name='Partygoer Keeper '+(i-19);b.emoji='★';
+    }else{
+      b.t={...BOT_TYPES.companion,key:'tung',name:'Tung Tung Sahur',color:'#a57b48'};
+      b.name=b.t.name;b.emoji='🥁';b.group=new THREE.Group();b.group.userData.mats=[];scene.add(b.group);
+      for(const [c,w,h,d,x,y,z] of [[0xa97647,.55,1.36,.46,0,.78,0],[0xe8ad54,.14,.81,.13,.36,.79,.28],
+        [0xf8ae55,.56,.17,.47,0,.57,0],[0x312733,.07,.08,.03,.13,1.19,.24],[0x312733,.07,.08,.03,-.13,1.19,.24]]){
+        addMesh(b.group,new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:c}),x,y,z);
+      }
+    }
+  }
+  Object.assign(b,{h:b.t.h,half:b.t.half,hp:b.t.hp,weapon:keeper||i===11?1:i%6});
+  resetEffects(b);
+  if(keeper)Object.assign(b,{x:43,z:i===20?24:30,y:0,vy:0});
+  else{atDock(b,t?i-6:i);b.home=naval.ships[t*2+Number(t?i>=9:i>=3)];}
+  bots.push(b);addBotTag(b);return b;
+}
+function navalSetup(){
+  clearWorld();navalClear();setupFlags();
+  Object.assign(naval,{time:0,phase:'fleet',unlock:[Infinity,Infinity],sunk:[0,0]});
+  document.body.classList.add('voyage');navalMap();
+  for(const t of [0,1])for(const big of [true,false])naval.ships.push(makeShip(t,big));
+  const t=BOT_TYPES[selectedChar];
+  Object.assign(player,{t,team:0,h:t.h,half:t.half,hp:t.hp,weapon:selectedWeapon,name:t.name+' (You)',
+    emoji:t.emoji,invuln:3,hitCd:0,fireCd:0,score:0,bonked:0,built:0,pocket:POCKET_MAX,pocketT:0,pitch:0,dropsT:0});
+  resetEffects(player);atDock(player,0);
+  const prev=fallen.getObjectByName('fallenActor');
+  if(prev){disposeModel(prev);fallen.remove(prev);}
+  const avatar=makeBotMesh(selectedChar,selectedSkin);scene.remove(avatar);
+  avatar.name='fallenActor';avatar.rotation.x=-Math.PI/2;avatar.position.y=.3;fallen.add(avatar);
+  for(let i=1;i<12;i++)navalBot(i,Number(i>=6));
+  navalBot(20,2,true);navalBot(21,2,true);
+  const geo=new THREE.SphereGeometry(.14,6,5);
+  for(let i=0;i<96;i++){
+    const m=new THREE.Mesh(geo,navMat(0x383842));m.visible=false;naval.root.add(m);naval.balls.push({m,on:false});
+  }
+  state=S.PLAYING;matchT=420;overtime=false;otT=0;overtimeKind='';
+  timeScale=1;slowmoT=0;autoFireT=0;buildMode=false;selType=T_BRICK;musicT=musicStep=0;bossMusic=false;
+  flagGroup.visible=fallen.visible=zoneLine.visible=false;
+  $('feed').innerHTML='';$('navHud').hidden=false;
+}
+function navalMove(a,dt,vx,vz){
+  const s=a.ship;
+  if(s && s.sink<5){
+    const station=a===player?naval.station:null;
+    const c=Math.cos(s.yaw),n=Math.sin(s.yaw);
+    if(!station){
+      a.deckX+=(vx*c-vz*n)*dt;a.deckZ+=(vx*n+vz*c)*dt;
+    }
+    Object.assign(a,shipWorld(s,a.deckX,a.deckZ));
+    if(Math.abs(a.deckX)>s.w || Math.abs(a.deckZ)>s.l){a.ship=null;a.y=0;a.vy=0;return;}
+    const deck=1.03-s.sink*.17;
+    a.vy-=GRAV*dt;a.y=Math.max(deck,a.y+a.vy*dt);
+    a.grounded=a.y<=deck+.01;if(a.grounded)a.vy=0;
+    return;
+  }
+  a.ship=null;
+  const wet=water[cellAt(a.x,a.z)],rate=wet?.49:1;
+  function ok(x,z){
+    const cell=cellAt(x,z);
+    if(cell<0||perm[cell])return false;
+    if(x>=38 && x<40 && (!gateOpen(a)||z<22.3||z>31.7||naval.time<naval.unlock[Number(z>=27)]))return false;
+    return x<40 || gateOpen(a);
+  }
+  const x=a.x+vx*dt*rate,z=a.z+vz*dt*rate;
+  if(ok(x,a.z))a.x=x;if(ok(a.x,z))a.z=z;
+  const surface=water[cellAt(a.x,a.z)]?(a.t.key==='skeleton'?-.35:-.02):0;
+  a.vy-=GRAV*dt;a.y=Math.max(surface,a.y+a.vy*dt);
+  a.grounded=a.y<=surface+.01;if(a.grounded)a.vy=0;
+}
+function ladderNear(a,s){
+  const p=shipLocal(s,a);
+  return s.sink<4 && Math.abs(Math.abs(p.x)-s.w)<1.08 && Math.abs(p.z)<1.02?p:null;
+}
+function interaction(a){
+  if(island(a)&&gateOpen(a)&&dist(a,chest)<1.65&&a.y<1.5)return {type:'chest',label:'Open buried chest'};
+  const s=a.ship;
+  if(s&&shipUp(s)){
+    const p=shipLocal(s,a);
+    if(s.mast<s.mastCap && Math.hypot(p.x,p.z)<.82)return {type:'mast',s,label:'Repair mast with plank'};
+    if(s.hp<s.cap && Math.hypot(p.x,p.z-s.l+.54)<.75)return {type:'hull',s,label:'Patch hull with plank'};
+    const choices=[{type:'helm',s,label:'Take wheel',d:dist(p,s.wheel)}];
+    for(const gun of s.guns)choices.push({type:'gun',s,gun,label:'Man cannon',d:dist(p,gun)});
+    choices.sort((a,b)=>a.d-b.d);return choices[0].d<.92?choices[0]:null;
+  }
+  for(const ship of naval.ships)if(ladderNear(a,ship))return {type:'board',s:ship,label:'Climb ladder'};
+  return null;
+}
+function navalAction(){
+  if(!naval.on||paused||state!==S.PLAYING)return;
+  if(naval.station){naval.station=null;primaryHeld=false;return;}
+  const action=interaction(player);
+  if(!action)return;
+  const {type,s,gun}=action;
+  if(type==='board'){const p=shipLocal(s,player);boardShip(player,s,Math.sign(p.x)*(s.w-.48),0);sfx('clack');}
+  if(type==='helm'||type==='gun'){
+    naval.station=action;
+    if(gun){boardShip(player,s,gun.x*.8,gun.z);player.yaw=s.yaw-gun.side*Math.PI/2;player.pitch=0;}
+    else {boardShip(player,s,s.wheel.x,s.wheel.z);player.yaw=s.yaw+Math.PI;player.pitch=0;}
+    buildMode=false;primaryHeld=false;sfx('clack');
+  }
+}
+function channelAction(dt){
+  const held=keys.has('KeyE')||naval.mouse||naval.touch||pad.b[1];
+  if(!held||!naval.held){naval.channel=null;}
+  naval.held=held;
+  if(!held||state!==S.PLAYING||naval.station||player.hitCd>0||player.wetT>0||keys.has('KeyF')||primaryHeld||touch.held.has('primary')){naval.channel=null;return;}
+  const a=interaction(player);
+  if(!a||!['chest','mast','hull'].includes(a.type)){naval.channel=null;return;}
+  if(naval.channel?.type!==a.type||naval.channel?.s!==a.s)naval.channel={...a,t:0};
+  naval.channel.t+=dt;
+  if(naval.channel.t<(a.type==='chest'?5:4))return;
+  naval.channel=null;
+  if(a.type==='chest')return navalWin(0,true);
+  if(a.type==='mast')a.s.mast=Math.min(a.s.mastCap,a.s.mast+45);
+  else a.s.hp=Math.min(a.s.cap,a.s.hp+36);
+  sfx('place');showMsg('REPAIR PLANK FITTED');
+}
+function shipHit(s,hull,mast,team){
+  if(!shipUp(s)||naval.stress)return;
+  const old=s.mast;s.mast=Math.max(0,s.mast-mast);
+  if(old>0&&!s.mast){sfx('smash');burst(s.x,.3,s.z,0x9ae6ff,9,3,3,.7);}
+  s.hp=Math.max(0,s.hp-hull);
+  if(s.hp)return;
+  s.sink=.001;s.sails=0;
+  if(naval.station?.s===s)naval.station=null;
+  const winner=team===s.team?1-s.team:team;
+  naval.sunk[winner]++;
+  if(naval.unlock[winner]>naval.time){
+    naval.unlock[winner]=naval.time;
+    naval.unlock[s.team]=Math.min(naval.unlock[s.team],naval.time+30);
+  }
+  sfx('horn');popup(teams[s.team].name+' '+s.name+' is sinking!');
+}
+function fireCannon(s,g,ammo,yaw,pitch,source,aim=null){
+  if(g.cd>0)return false;
+  const p=naval.balls.find(x=>!x.on);
+  if(!p)return false;
+  const start=shipWorld(s,g.x+g.side*.54,g.z),speed=ammo===2?21:19;
+  const dx=-Math.sin(yaw),dz=-Math.cos(yaw);
+  const air=aim ? Math.min(1.8,dist(start,aim)/speed) : 0;
+  Object.assign(p,{...start,on:true,y:1.34,dX:dx*speed,dZ:dz*speed,
+    dY:aim?air*4+(ammo===2?1.25:.1)/Math.max(.2,air):Math.sin(pitch)*speed+2.55,
+    t:2.35,s,ammo,source});
+  p.m.position.set(p.x,p.y,p.z);p.m.visible=true;
+  p.m.scale.set(ammo===1?2.1:1,ammo===2?1.45:1,ammo===2?1.45:1);
+  g.cd=s.reload;
+  if(dist(player,s)<18){tone(125,46,.18,'triangle',.23);noise(.13,.14,420);}
+  return true;
+}
+function playerCannon(){
+  const st=naval.station;
+  if(!st?.gun||!shipUp(st.s)||player.wetT>0||paused)return;
+  const facing=st.s.yaw-st.gun.side*Math.PI/2;
+  const aim=facing+clamp(turnDelta(player.yaw,facing),-1.02,1.02);
+  fireCannon(st.s,st.gun,st.gun.ammo,aim,clamp(player.pitch,-.21,.36),player);
+}
+function cannonStep(dt){
+  for(const p of naval.balls){
+    if(!p.on)continue;
+    p.x+=p.dX*dt;p.z+=p.dZ*dt;p.y+=p.dY*dt;p.dY-=8*dt;p.t-=dt;
+    p.m.position.set(p.x,p.y,p.z);
+    if(p.ammo===1)p.m.rotation.z+=dt*13;
+    let hit=false;
+    for(const s of naval.ships){
+      if(s===p.s||s.team===p.s.team||!shipUp(s))continue;
+      const l=shipLocal(s,p),wide=p.ammo===2?1.1:0;
+      if(Math.abs(l.x)>s.w+wide||Math.abs(l.z)>s.l+wide||p.y>3.65||p.y<.10)continue;
+      if(p.ammo===2){
+        let struck=false;
+        for(const a of charsPhysical())if(a.team!==p.s.team && a.ship===s && dist(a,p)<2.25 && p.y>a.y-.2 && p.y<a.y+a.h+.5){
+          damageChar(a,2,p.source);a.spinT=.48;struck=true;
+        }
+        if(!struck)continue;
+      }else if(p.ammo===1)shipHit(s,2,30,p.s.team);
+      else shipHit(s,24,0,p.s.team);
+      burst(p.x,p.y,p.z,0xffda70,7,3,4,.45);hit=true;break;
+    }
+    const cell=cellAt(p.x,p.z);
+    if(hit||p.y<.10||p.t<=0||cell<0||perm[cell]||p.x>38){
+      if(!hit&&p.y<.2&&cell>=0)burst(p.x,.16,p.z,0x9ae7ff,6,2,3,.46);
+      p.on=false;p.m.visible=false;
+    }
+  }
+}
+function preferredShip(a){
+  return [a.home,...naval.ships].find(s=>s && s.team===a.team && shipUp(s));
+}
+function seaSpawn(a){
+  const ship=naval.ships.find(s=>s.team===a.team&&shipUp(s));
+  a.hp=a.t.hp;a.invuln=2.4;a.hitCd=0;a.fireCd=.65;resetEffects(a);
+  if(ship)boardShip(a,ship,((a.slot||0)%3-1)*.67,.8+((a.slot||0)%2)*.7);
+  else atDock(a,a.slot||0);
+  if(a!==player){a.alive=true;a.ghost=false;a.group.visible=true;}
+  else{
+    clearTouchInput();primaryHeld=false;naval.channel=null;naval.station=null;buildMode=false;
+    sfx('respawn');showMsg(ship?'Back aboard the '+ship.name+'!':'Back at the dock!',2);
+  }
+}
+function navalBonk(a,src){
+  if(naval.phase==='sudden'&&src&&src.team<2&&a.team<2&&island(a)&&island(src)){
+    src.score++;navalWin(src.team,false);return true;
+  }
+  if(a===player){naval.channel=null;naval.station=null;}
+  a.openT=0;
+  if(island(a) && naval.phase!=='sudden' && !a.keeper)return false;
+  if(src&&src!==a)src.score++;
+  if(a.keeper){a.returnT=10;return true;}
+  seaSpawn(a);return true;
+}
+function voyageHelm(s,dt){
+  if(!shipUp(s)){
+    s.sink=Math.min(15,s.sink+dt);
+    s.root.position.y=-s.sink*.17;s.root.rotation.z=s.sink*.026;
+    if(s.sink>=15)s.root.visible=false;
+    return;
+  }
+  const st=naval.station, manual=st?.s===s&&st.type==='helm';
+  const crew=bots.some(a=>a.alive&&a.ship===s&&!a.keeper);
+  s.ram=Math.max(0,s.ram-dt);
+  s.rig.rotation.z+=((s.mast?0:1.2)-s.rig.rotation.z)*Math.min(1,dt*3.5);
+  s.hole.visible=s.hp<s.cap;
+  if(manual){
+    const x=Number(keys.has('KeyD'))-Number(keys.has('KeyA'))+pad.lx+touch.x;
+    const y=Number(keys.has('KeyW'))-Number(keys.has('KeyS'))-pad.ly-touch.y;
+    const lever=Math.abs(y)>.45?Math.sign(y):0;
+    if(lever&&lever!==s.lever)s.sails=clamp(s.sails+lever,0,2);
+    s.lever=lever;
+    s.yaw-=clamp(x,-1,1)*s.turn*dt;
+  }else if(crew&&!naval.stress&&naval.time>12){
+    const enemy=naval.ships.find(o=>o.team!==s.team&&shipUp(o));
+    const landing=gateOpen(s);
+    const goal=landing?{x:34.5,z:27}:enemy||{x:25,z:24};
+    const d=dist(s,goal);
+    const heading=Math.atan2(goal.x-s.x,goal.z-s.z)+(landing?0:d<20?(s.big?1.12:-1.12):0);
+    s.yaw+=clamp(turnDelta(heading,s.yaw),-s.turn*dt,s.turn*dt);
+    s.sails=landing&&d<2.45?0:d<11?1:2;
+  }else if(!naval.stress)s.sails=0;
+  const target=s.top*s.sails/2*(s.mast?1:.24);
+  s.speed+=(target-s.speed)*Math.min(1,dt*1.15);
+  const x=clamp(s.x+Math.sin(s.yaw)*s.speed*dt,5.8,35.3);
+  const z=clamp(s.z+Math.cos(s.yaw)*s.speed*dt,6,44);
+  s.x=x;s.z=z;
+  s.root.position.set(x,Math.sin(naval.time*2+s.team)*.035,z);
+  s.root.rotation.y=s.yaw;
+  for(const g of s.guns)g.cd=Math.max(0,g.cd-dt);
+}
+function collideShips(){
+  for(let i=0;i<naval.ships.length;i++)for(let j=i+1;j<naval.ships.length;j++){
+    const a=naval.ships[i],b=naval.ships[j],d=dist(a,b);
+    const gap=(a.w+b.w)*1.09;
+    if(!shipUp(a)||!shipUp(b)||d>=gap)continue;
+    const x=d>.001?(a.x-b.x)/d:1,z=d>.001?(a.z-b.z)/d:0;
+    a.x+=x*(gap-d)*.49;b.x-=x*(gap-d)*.49;
+    a.z+=z*(gap-d)*.49;b.z-=z*(gap-d)*.49;
+    if(a.ram||b.ram||a.speed+b.speed<1)continue;
+    a.ram=b.ram=3;a.speed*=.4;b.speed*=.4;
+    shipHit(a,8,0,b.team);shipHit(b,8,0,a.team);
+    for(const p of charsPhysical())if(p.ship===a||p.ship===b){p.spinT=.65;p.vy=2.55;}
+    if(dist(player,a)<12)sfx('boink');
+  }
+}
+function botGo(b,goal,dt){
+  const d=dist(b,goal);
+  if(d<.13)return;
+  const x=(goal.x-b.x)/d,z=(goal.z-b.z)/d;
+  b.yaw=Math.atan2(-x,-z);
+  if(b.wetT<=0)applyMomentum(b,dt,x*b.t.speed*actorSpeed(b),z*b.t.speed*actorSpeed(b));
+}
+function navalCrew(b,dt){
+  if(b.ghost){updateBotGhost(b,dt);return;}
+  if(!b.alive){
+    if(b.keeper&&(b.returnT-=dt)<=0){
+      b.alive=true;b.hp=b.t.hp;b.invuln=2;
+      b.x=43;b.z=b.slot===20?24:30;b.y=0;
+    }
+    return;
+  }
+  b.invuln-=dt;b.fireCd-=dt;b.hitCd-=dt;b.lunge=Math.max(0,b.lunge-dt*4);
+  tickEffects(b,dt);
+  if(b.ship){
+    const s=b.ship;
+    if(s.sink>=5){b.ship=null;b.y=0;}
+    else if(!naval.stress&&gateOpen(b)&&s.x>31&&Math.abs(s.z-27)<7){
+      b.x=Math.min(37,s.x+2.6);b.z=s.z;b.ship=null;b.y=0;
+    }else{
+      const spot=shipWorld(s,b.deckX,b.deckZ);b.x=spot.x;b.z=spot.z;b.y=1.03-s.sink*.17;
+      return;
+    }
+  }
+  if(!island(b) && !gateOpen(b)){
+    const ship=preferredShip(b);
+    if(!ship)return;
+    if(b.ladderShip!==ship){b.ladderShip=ship;b.ladderSide=shipLocal(ship,b).x<0?-1:1;}
+    const side=b.ladderSide;
+    const ladder=shipWorld(ship,side*(ship.w+.42),0);
+    if(ladderNear(b,ship)){
+      const slot=b.slot%3;
+      boardShip(b,ship,slot===0?0:side*(ship.w-.46),slot===0?ship.wheel.z:(slot-1.5)*1.6);
+    }else botGo(b,ladder,dt);
+    return;
+  }
+  if(!island(b)){
+    const lane=b.team?28.5:25.5;
+    botGo(b,{x:Math.abs(b.z-lane)>1.3?36.7:42,z:lane},dt);
+    return;
+  }
+  // Chest attackers and keepers share the Funny Arsenal. Keepers never claim the chest.
+  let rival=null,near=12;
+  for(const a of charsPhysical())if(island(a)&&enemies(b,a)&&!(b.keeper&&a.keeper)){
+    const d=dist(a,b);
+    if(d<near){near=d;rival=a;}
+  }
+  const target=b.keeper?(rival||{x:43,z:b.slot===20?24:30}):chest;
+  const close=dist(b,chest)<1.52 && b.y<1.5;
+  if(b.keeper||!close){
+    const dx=target.x-b.x,dz=target.z-b.z,m=Math.hypot(dx,dz)||1;
+    const ahead=heightAt(b.x+dx/m*.65,b.z+dz/m*.65);
+    if(ahead>b.y+STEP && b.grounded)b.vy=JUMP_V;
+    if(b.keeper&&near<1.25)applyMomentum(b,dt,0,0);
+    else botGo(b,target,dt);
+  }else applyMomentum(b,dt,0,0);
+  if(rival&&b.fireCd<=0&&b.wetT<=0&&hasLOS(b.x,b.y+.85,b.z,rival.x,rival.y+.8,rival.z)){
+    const melee=b.weapon===1;
+    if(!melee||near<1.75){
+      if(b.t.key==='tung'&&rival.invuln<=0){
+        for(let i=0;i<3;i++)tone(166,61,.13,'sine',.27,i*.13);
+        strike(b,rival,1,rival.x-b.x,rival.z-b.z);
+      }else botFire(b,rival);
+      b.fireCd=melee?1.08:1.55+Math.random()*.65;
+    }
+  }
+  if(!b.keeper){
+    b.openT=close&&b.hitCd<=0&&b.wetT<=0?(b.openT||0)+dt:0;
+    if(b.openT>=5)navalWin(b.team,true);
+  }
+}
+function botCannons(){
+  for(const s of naval.ships){
+    if(!shipUp(s))continue;
+    const crew=bots.filter(b=>b.alive&&b.ship===s);
+    const targets=naval.ships.filter(t=>t.team!==s.team&&shipUp(t)).sort((a,b)=>dist(a,s)-dist(b,s));
+    const target=targets[0];
+    if(!target||(!crew.length&&!naval.stress))continue;
+    if(crew.length>1&&s.mast===0&&(s.repair=(s.repair||0)+.13)>=4){s.mast=40;s.repair=0;}
+    const used=new Set();
+    for(const gun of s.guns){
+      if(naval.station?.gun===gun||gun.cd>0)continue;
+      const pos=shipWorld(s,gun.x,gun.z);
+      const yaw=Math.atan2(pos.x-target.x,pos.z-target.z);
+      const angle=Math.abs(turnDelta(yaw,s.yaw-gun.side*Math.PI/2));
+      if(!naval.stress && (angle>1.13||dist(s,target)>29))continue;
+      const playerAtWheel=naval.station?.s===s&&naval.station.type==='helm';
+      const src=crew.find(b=>!used.has(b)&&(naval.stress||!(b.navalGunReady>naval.time))&&
+        (playerAtWheel||crew.length===1||b!==crew[0]));
+      if(!src&&!naval.stress)break;
+      if(src)used.add(src);
+      const ammo=naval.stress?gun.ammo:target.mast>0&&Math.random()<.21?1:Math.random()<.13?2:0;
+      if(fireCannon(s,gun,ammo,yaw,0,src||{team:s.team,name:s.name,emoji:'⚓',score:0},target)&&src&&!naval.stress){
+        src.navalGunReady=naval.time+s.reload;
+        src.deckX=gun.x*.72;src.deckZ=gun.z;
+        src.yaw=yaw;
+      }
+    }
+  }
+}
+function navalStep(dt){
+  naval.time+=dt;navBudget=2;
+  for(const s of naval.ships)voyageHelm(s,dt);
+  if(!naval.stress)collideShips();
+  if(state===S.PLAYING){
+    if(naval.station?.type==='helm')player.yaw=naval.station.s.yaw+Math.PI;
+    updatePlayer(dt);channelAction(dt);
+  }else if(state===S.GHOST){
+    updateGhost(dt);ghost.x=Math.max(40.28,ghost.x);
+  }
+  if(state===S.ENDED)return;
+  for(const b of bots){navalCrew(b,dt);if(state===S.ENDED)return;}
+  naval.gunTick=(naval.gunTick||0)-dt;
+  if(naval.gunTick<=0){naval.gunTick=.13;botCannons();}
+  updateHats();cannonStep(dt);
+}
+function navalClock(dt){
+  if(naval.phase==='fleet'){
+    matchT=Math.max(0,matchT-dt);
+    if(matchT===0){
+      naval.unlock=[naval.time,naval.time];naval.phase='race';matchT=60;
+      popup('BOTH DOORS OPEN!');
+    }
+  }else if(naval.phase==='race'){
+    matchT=Math.max(0,matchT-dt);
+    if(matchT===0){
+      naval.phase='sudden';matchT=30;
+      if(state===S.GHOST)respawnNow();
+      showMsg('SUDDEN BONK: first rival bonk on the island wins!',4);
+    }
+  }else if(naval.phase==='sudden'){
+    matchT=Math.max(0,matchT-dt);
+    if(matchT===0)endMatch({draw:true,reason:'Sudden Bonk ended in a draw.'});
+  }
+}
+function navalWin(team,escaped){
+  if(state===S.ENDED)return;
+  if(escaped){naval.exit.visible=true;naval.lid.rotation.x=-1.25;naval.lid.position.y+=.18;}
+  endMatch({winner:team===0?player:bots.find(b=>b.team===team),team,escaped,
+    reason:teams[team].name+(escaped?' found the EXIT and escaped!':' wins Sudden Bonk!')});
+}
+function pips(value,max){
+  const n=Math.ceil(3*value/max);return '●'.repeat(n)+'○'.repeat(3-n);
+}
+function navalHUD(dt){
+  naval.hud-=dt;if(naval.hud>0)return;naval.hud=.14;
+  for(const t of [0,1])naval.doors[t].position.y=naval.time>=naval.unlock[t]?4.7:1.6;
+  setText('navFleet',naval.ships.map(s=>(s.team?'🟠':'🔵')+' '+s.name+' '+pips(s.hp,s.cap)+' / '+pips(s.mast,s.mastCap)).join('  '));
+  let hint=naval.phase==='sudden'?'Sudden Bonk · island bonks decide':gateOpen(player)?'Island door open · find the chest':
+    Number.isFinite(naval.unlock[0])?'Your door opens in '+Math.max(0,Math.ceil(naval.unlock[0]-naval.time))+'s':'Sink an enemy ship to open the Island Door';
+  if(naval.station){
+    const {s,gun}=naval.station;
+    hint=gun?N_AMMO[gun.ammo]+(gun.cd>0?' · reload '+gun.cd.toFixed(1)+'s':' · ready')+' · Action to leave':
+      ['Stopped','Half sail','Full sail'][s.sails]+' · W/S or stick · Action to leave wheel';
+  }else if(state===S.PLAYING){
+    const a=interaction(player);
+    if(a)hint=a.label+' · Action'+(naval.channel?' '+naval.channel.t.toFixed(1)+' / '+(a.type==='chest'?5:4)+'s':'');
+  }
+  setText('navHint',hint);
+}
+function navalStress(){
+  if(!naval.on){$('v2Mode').value='voyage';startMatch(inputMode);}
+  else navalSetup();
+  naval.stress=true;naval.gunTick=0;
+  // Stress roster equals 12 bots: the two stationary Keepers are excluded.
+  const keepers=bots.filter(b=>b.keeper);
+  for(const b of keepers){disposeModel(b.group);scene.remove(b.group);}
+  bots=bots.filter(b=>!b.keeper);
+  navalBot(12,0);
+  for(const s of naval.ships){
+    for(let i=0;i<s.guns.length;i++){s.guns[i].cd=0;s.guns[i].ammo=i%3;}
+  }
+  for(const b of bots){const s=preferredShip(b);boardShip(b,s,(b.slot%3-1)*.6,b.slot%2?-.8:.8);}
+  showMsg('NAVAL STRESS: 12 bots, 4 ships, all 32 cannons live.',6);
+}
+function navalResults(res){
+  const info='Ships sunk — Water Rooms '+naval.sunk[0]+', Yellow Rooms '+naval.sunk[1]+
+    '. '+(res.escaped?teams[res.team].name+' escaped.':'Nobody escaped.');
+  $('endTitle').textContent=res.draw?'BONK VOYAGE — DRAW':teams[res.team].name+' wins Bonk Voyage!';
+  $('endStats').textContent=info;
+  naval.result={t:0,escaped:res.escaped,room:new THREE.Group()};
+  if(res.escaped)$('end').classList.add('hidden');
+  const g=naval.result.room;scene.add(g);g.position.set(25,0,25);g.visible=false;
+  navBox(g,0xc5a957,18,.35,14,0,.18,0);
+  for(let row=-1;row<=1;row++)for(let col=-1;col<=1;col++){
+    const x=col*5,z=row*4.2,c=[0x598584,0x9c674e,0x655d85][row+1];
+    navBox(g,c,2.8,.55,.97,x,.65,z);
+    navBox(g,c,2.8,.58,.23,x,1.05,z-.39);
+    for(const h of [-1,1])navBox(g,c,.28,.49,1.02,x+h*1.29,.94,z);
+    navBox(g,0x9a734d,.86,.24,.95,x+1.75,.46,z+1.45);
+    navBox(g,c,.75,.42,.72,x-1.7,.57,z+1.55);
+    navBox(g,c,.75,.51,.22,x-1.7,.92,z+1.82);
+    navBox(g,0xccbdd0,.08,1.1,.08,x+1.75,1,z+1.45);
+    navBox(g,0xffdb83,.46,.41,.42,x+1.75,1.64,z+1.45);
+    navBox(g,0xfff5d3,2.9,.12,.35,x,3.45,z);
+  }
+}
+function navalOrbit(dt){
+  const r=naval.result;if(!r)return;r.t+=dt;
+  if(r.escaped&&r.t<1.55){
+    camera.position.set(chest.x-1.35-r.t*2.35,1.42+r.t*.68,chest.z+1.15+r.t*.6);
+    camera.lookAt(chest.x,1.24,chest.z);return;
+  }
+  if(!r.room.visible){
+    for(const child of naval.root.children)child.visible=false;
+    naval.root.add(r.room);r.room.position.set(25,6,25);r.room.visible=true;
+    $('end').classList.remove('hidden');
+  }
+  const a=r.t*.17;
+  camera.position.set(25+Math.cos(a)*14,12.6,25+Math.sin(a)*14);
+  camera.lookAt(25,6.8,25);
+}
+
+bindTouchPointer('touchAction',()=>{naval.touch=true;navalAction();},null,()=>{naval.touch=false;naval.channel=null;});
 // ---------------- main loop ----------------
 genMaze(12345); placeLandmarks(); buildMazeMeshes();
 let last = performance.now(), lastRender = 0, acc = 0;
@@ -2865,8 +3499,9 @@ function frame(now) {
   requestAnimationFrame(frame);
   if (fps15 && now - lastRender < 1000 / 15 - 1) return;
   lastRender = now;
-  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  const wallDt = (now - last) / 1000, dt = Math.min(0.1, wallDt); last = now;
   pollPad();
+  if(state===S.ENDED && naval.on) navalOrbit(dt);
   if (state === S.TITLE) { titleCamera(dt); drawPadTest(); }
   else if (isActive() && !paused) {
     const wdt = dt * timeScale;
@@ -2881,7 +3516,7 @@ function frame(now) {
   renderer.render(scene, camera);
   updateDebug();
   // FPS meter + adaptive quality: steps down when slow, back up when it recovers
-  fpsFrames++; fpsTime += dt;
+  fpsFrames++; fpsTime += wallDt;
   if (fpsTime >= 1) {
     fpsVal = fpsFrames / fpsTime; fpsFrames = 0; fpsTime = 0;
     setText('fps', fpsVal.toFixed(0) + ' FPS' + (renderScale < 1 ? ` · ${Math.round(renderScale * 100)}%` : ''));
@@ -2903,7 +3538,7 @@ window.BBB = { get state() { return state; }, get paused() { return paused; }, p
   get transitions() { return transitionsLog.slice(); }, get ghost() { return ghost; }, set matchT(v) { matchT = v; }, get matchT() { return matchT; },
   get overtime() { return overtime; }, get otT() { return otT; }, set otT(v) { otT = v; }, get navRecomputes() { return navRecomputes; }, get landmarks() { return landmarks; },
   bonkBot, damageChar, bonkPlayer, selectGhostAnchor, placementCheck, get flags(){return flags;}, get captures(){return captures;}, get overtimeKind(){return overtimeKind;},
-  get weapons(){return weapons;}, get decals(){return decals;}, get hats(){return hats;}, playerFire, actorSpeed, strike, updateFlags, flagRouteOpen, get endTitle() { return $('endTitle').textContent; }, water, perm, N, DIVIDER_I };
+  get weapons(){return weapons;}, get decals(){return decals;}, get hats(){return hats;}, playerFire, actorSpeed, strike, updateFlags, flagRouteOpen, get endTitle() { return $('endTitle').textContent; }, water, perm, N, DIVIDER_I, naval, navalStep, navalAction, navalClock, shipHit };
 </script>
 </body>
 </html>

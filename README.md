@@ -1,6 +1,6 @@
 # Backrooms Build Brawl
 
-A 3D arena game based on the drawings and story of **August Spangler**. **Version 2 — Capture the Flag** (audited Nov 23, 2026): 3v3 CTF with the Funny Arsenal, nine playable characters, and Bonk-to-Build fort building.
+A 3D arena game based on the drawings and story of **August Spangler**. **Version 3 — Bonk Voyage** (audited Nov 23, 2026): a third mode joins Capture the Flag and Bonk Brawl — 6v6 pirate ship battles with round/chain/grape shot, a treasure island, and an EXIT sign for a prize.
 
 **Art & Story by August Spangler • Directed by August & Corey Spangler • Built by AI**
 
